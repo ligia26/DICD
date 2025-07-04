@@ -1,0 +1,10 @@
+{
+    "require": {
+        "phpmailer/phpmailer": "^6.9",
+        "aws/aws-sdk-php": "^3.322",
+        "google/apiclient": "^2.0",
+        "firebase/php-jwt": "^6.10",
+        "google/apiclient-services": "^0.355.0",
+        "vlucas/phpdotenv": "^5.6"
+    }
+}
