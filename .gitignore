@@ -1,0 +1,22 @@
+# Environment Variables File - Contains Sensitive Information
+.env
+
+# Database dumps
+*.sql
+*.sqlite
+
+# Temporary files
+temp/
+instance/
+
+# Log files
+*.log
+access_log.php
+
+# IDE files
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
