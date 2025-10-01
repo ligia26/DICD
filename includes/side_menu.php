@@ -57,7 +57,7 @@
                 </ul>
             </li>
         <?php endif; ?>
-        <li class="menu-label">Manual Rules</li>
+        
         <li>
             <a class="has-arrow" href="javascript:;">
                 <div class="parent-icon"><i class="bx bx-data"></i></div>
