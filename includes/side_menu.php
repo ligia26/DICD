@@ -88,9 +88,16 @@
                 <div class="parent-icon"><i class='bx bx-link-external'></i></div>
                 <div class="menu-title">Integration Data</div>
             </a>
-           
         </li>
 
+        <li>
+            <a href="subscriber_manager.php">
+                <div class="parent-icon"><i class='bx bx-dice-5'></i></div>
+                <div class="menu-title">Subscriber Manager</div>
+            </a>
+        </li>
+
+      
         <?php if ($_SESSION['user_role'] === 1): ?>
             <li>
                 <a href="access_log.php">
