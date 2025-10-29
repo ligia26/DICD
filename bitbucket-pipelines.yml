@@ -9,5 +9,5 @@ pipelines:
             - apt-get update && apt-get install -y rsync openssh-client
             - mkdir -p ~/.ssh
             - chmod 700 ~/.ssh
-            - ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
-            - rsync -avz --delete ./ $SERVER_USER@$SERVER_IP:/var/www/new
+            - ssh-keyscan -H 149.102.137.255 >> ~/.ssh/known_hosts
+            - rsync -avz --delete ./ 149.102.137.255@root:/var/www/new
