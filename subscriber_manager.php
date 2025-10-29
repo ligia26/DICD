@@ -74,6 +74,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['csv_file'])) {
     } elseif (!$group) {
         $_SESSION['error_message'] = "Please select a group.";
     } else {
+        
+        // Validate CSV - check if first column has emails
+        $file = $_FILES['csv_file']['tmp_name'];
+        
+        if (($handle = fopen($file, "r")) !== false) {
+            $has_valid_emails = false;
+            $row_count = 0;
+            
+            while (($data = fgetcsv($handle, 1000, ",")) !== false && $row_count < 10) {
+                if ($row_count > 0 && !empty($data[0])) { // Skip header row
+                    // Check if first column contains valid email
+                    if (filter_var(trim($data[0]), FILTER_VALIDATE_EMAIL)) {
+                        $has_valid_emails = true;
+                        break;
+                    }
+                }
+                $row_count++;
+            }
+            fclose($handle);
+            
+            if (!$has_valid_emails) {
+                $_SESSION['error_message'] = "Invalid CSV format. The first column must contain valid email addresses.";
+                header("Location: subscriber_manager.php");
+                exit;
+            }
+        }   
+        else {
+            $_SESSION['error_message'] = "Could not read the CSV file.";
+            header("Location: subscriber_manager.php");
+            exit;
+        }
         $original_filename = $_FILES['csv_file']['name'];
         $job_id = uniqid();
         
@@ -86,15 +117,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['csv_file'])) {
         $stmt->bind_param("ssss", $job_id, $original_filename, $combined_info, $group);
         
         if ($stmt->execute()) {
-    $_SESSION['success_message'] = "CSV uploaded successfully!";
-    header("Location: subscriber_manager.php");  // Add this line
-    exit;  // Add this line
-} else {
-    $_SESSION['error_message'] = "Database error: " . $stmt->error;
-    header("Location: subscriber_manager.php");  // Add this line
-    exit;  // Add this line
-}
-$stmt->close();;
+            $_SESSION['success_message'] = "CSV uploaded successfully!";
+            header("Location: subscriber_manager.php");  // Add this line
+            exit;  // Add this line
+        } else {
+            $_SESSION['error_message'] = "Database error: " . $stmt->error;
+            header("Location: subscriber_manager.php");  // Add this line
+            exit;  // Add this line
+        }
+        $stmt->close();;
     }
 }
 

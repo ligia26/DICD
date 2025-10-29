@@ -13,8 +13,6 @@ $user_id = $_SESSION['user_id'];
 
 $user_data = getUserData($conn, $user_id);
 $is_admin = $user_data['admin'];
-echo $is_admin;
-
 
 $from_date = isset($_POST['from_date']) ? $_POST['from_date'] : date('Y-m-d');
 $to_date = isset($_POST['to_date']) ? $_POST['to_date'] : date('Y-m-d');
@@ -71,16 +69,15 @@ $to_date = isset($_POST['to_date']) ? $_POST['to_date'] : date('Y-m-d');
                     </div>
                 </div>
 
-
                 <div class="row">
-    <div class="col">
-        <div class="card radius-10">
-            <div class="card-body">
-                <div id="chart6" style="width: 100%; height: 600px;"></div>
-            </div>
-        </div>
-    </div>
-</div>
+                    <div class="col">
+                        <div class="card radius-10">
+                            <div class="card-body">
+                                <div id="chart6" style="width: 100%; height: 600px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Second Chart -->
                 <div class="row">
@@ -95,29 +92,24 @@ $to_date = isset($_POST['to_date']) ? $_POST['to_date'] : date('Y-m-d');
 
                 <?php if ($is_admin): ?>
                     <div class="card radius-10">
-    <div class="card-body">
-        <h5>Domains That Haven't Sent Anything</h5>
-        <div id="domainsNoSends" class="alert alert-warning">
-            Loading...
-        </div>
-    </div>
-</div>
+                        <div class="card-body">
+                            <h5>Domains That Haven't Sent Anything</h5>
+                            <div id="domainsNoSends" class="alert alert-warning">
+                                Loading...
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="row">
-    <div class="col">
-        <div class="card radius-10">
-            <div class="card-body">
-                <div id="chart8" style="width: 100%; height: 600px;"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<?php endif; ?>
-
-
-                
+                        <div class="col">
+                            <div class="card radius-10">
+                                <div class="card-body">
+                                    <div id="chart8" style="width: 100%; height: 600px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
 
             </div>
         </div>
@@ -133,14 +125,11 @@ $to_date = isset($_POST['to_date']) ? $_POST['to_date'] : date('Y-m-d');
     <script>
 document.addEventListener('DOMContentLoaded', function () {
     function loadCharts() {
-        // Get selected dates
         const fromDate = document.getElementById('inputFromDate').value;
         const toDate = document.getElementById('inputToDate').value;
 
-        // Debugging: Check selected dates
         console.log("Fetching data for:", fromDate, toDate);
 
-        // Prepare form data
         const formData = new URLSearchParams();
         formData.append('from_date', fromDate);
         formData.append('to_date', toDate);
@@ -162,13 +151,12 @@ document.addEventListener('DOMContentLoaded', function () {
             const noSendsDiv = document.getElementById('domainsNoSends');
 
             if (noSendsDiv) {
-
-            if (data.domains_with_no_sends && data.domains_with_no_sends.length > 0) {
-                noSendsDiv.innerHTML = "<ul>" + data.domains_with_no_sends.map(domain => `<li>${domain}</li>`).join('') + "</ul>";
-            } else {
-                noSendsDiv.innerHTML = '<span class="text-success">All domains have sent at least something.</span>';
+                if (data.domains_with_no_sends && data.domains_with_no_sends.length > 0) {
+                    noSendsDiv.innerHTML = "<ul>" + data.domains_with_no_sends.map(domain => `<li>${domain}</li>`).join('') + "</ul>";
+                } else {
+                    noSendsDiv.innerHTML = '<span class="text-success">All domains have sent at least something.</span>';
+                }
             }
-        }
 
             const domainData = data.processedData;
             const sortedCategories = data.dates.reverse();
@@ -177,7 +165,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 data: series.data.reverse()
             }));
 
-            // Destroy existing charts to force a full refresh
             Highcharts.chart('chart5', {
                 chart: { type: 'column' },
                 title: { text: 'Amount of Sending by Domain' },
@@ -203,59 +190,48 @@ document.addEventListener('DOMContentLoaded', function () {
                 series: trendData
             });
 
-
             Highcharts.chart('chart7', {
-    chart: { type: 'line' },
-    title: { text: 'Total Emails Sent Per Day (Last 15 Days)' },
-    xAxis: { categories: sortedCategories, title: { text: 'Date' } },
-    yAxis: { title: { text: 'Total Emails Sent' } },
-    tooltip: { shared: true, valueSuffix: ' emails' },
-    series: [{
-        name: 'Total Emails Sent',
-        data: data.totalSendingData.data, // Use the new dataset
-        color: '#FF5733'
-    }]
-});
+                chart: { type: 'line' },
+                title: { text: 'Total Emails Sent Per Day (Last 15 Days)' },
+                xAxis: { categories: sortedCategories, title: { text: 'Date' } },
+                yAxis: { title: { text: 'Total Emails Sent' } },
+                tooltip: { shared: true, valueSuffix: ' emails' },
+                series: [{
+                    name: 'Total Emails Sent',
+                    data: data.totalSendingData.data,
+                    color: '#FF5733'
+                }]
+            });
 
-
-Highcharts.chart('chart8', {
-    chart: { type: 'column' },
-    title: { text: 'Total Sending by Company' },
-    xAxis: { type: 'category', title: { text: 'Company' } },
-    yAxis: { title: { text: 'Count Injected' } },
-    legend: { enabled: false },
-    tooltip: {
-        formatter: function () {
-            return `<b>Company:</b> ${this.point.name}<br>
-                    <b>Total Sent:</b> ${this.point.y}`;
-        }
-    },
-    series: [{
-        name: 'Count Injected',
-        colorByPoint: true,
-        data: data.companyData
-    }]
-});
-
-
-
-
-
+            Highcharts.chart('chart8', {
+                chart: { type: 'column' },
+                title: { text: 'Total Sending by Company' },
+                xAxis: { type: 'category', title: { text: 'Company' } },
+                yAxis: { title: { text: 'Count Injected' } },
+                legend: { enabled: false },
+                tooltip: {
+                    formatter: function () {
+                        return `<b>Company:</b> ${this.point.name}<br>
+                                <b>Total Sent:</b> ${this.point.y}`;
+                    }
+                },
+                series: [{
+                    name: 'Count Injected',
+                    colorByPoint: true,
+                    data: data.companyData
+                }]
+            });
         })
         .catch(error => console.error('Error fetching chart data:', error));
     }
 
-    // Load charts on page load
     setTimeout(loadCharts, 500);
 
-    // Update charts when the filter button is clicked
     document.querySelector('form').addEventListener('submit', function (event) {
-        event.preventDefault(); // Prevent page reload
+        event.preventDefault();
         loadCharts();
     });
 });
-
-
     </script>
 
 </div>

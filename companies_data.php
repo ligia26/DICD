@@ -1,9 +1,9 @@
 <?php
-include 'includes/head.php';
+session_start();
 include 'includes/db.php';
 include 'includes/functions.php';
+
 global $conn;
-session_start();
 $user_id = $_SESSION['user_id']; 
 
 $user_data = getUserData($conn, $user_id);
@@ -26,6 +26,7 @@ $company_data_result = getCompanyData($conn, $is_admin, $company);
 <!doctype html>
 <html>
 <head>
+    <?php include "includes/head.php"; ?>
     <style>
         th, td {
             padding: 12px;
@@ -147,34 +148,39 @@ $company_data_result = getCompanyData($conn, $is_admin, $company);
             <p class="mb-0">Copyright © 2024. All rights reserved.</p>
         </footer>
     </div>
-
+   
     <script src="assets/js/jquery.min.js"></script>
     <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/plugins/simplebar/js/simplebar.min.js"></script>
+    <script src="assets/plugins/metismenu/js/metisMenu.min.js"></script>
+    <script src="assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js"></script>
+    <script src="assets/js/app.js"></script>
+    
     <script>
         function autoFillDerivedValues() {
-    $('#companyDataTable tbody tr').each(function () {
-        const row = $(this);
-        const mainDomain = row.find('input[name="main_domain[]"]').val()?.trim();
-        const sendingDomain = row.find('input[name="sending_domain[]"]').val()?.trim();
+            $('#companyDataTable tbody tr').each(function () {
+                const row = $(this);
+                const mainDomain = row.find('input[name="main_domain[]"]').val()?.trim();
+                const sendingDomain = row.find('input[name="sending_domain[]"]').val()?.trim();
 
-        if (mainDomain) {
-            row.find('input[name="bimi_value[]"]').val(`v=BIMI1; l=https://www.${mainDomain}/img/${mainDomain}-logo.svg;`);
-            row.find('input[name="bimi_name[]"]').val(`default._bimi.${mainDomain}`);
-            row.find('input[name="dmarc_value[]"]').val(`v=DMARC1; p=reject; rua=mailto:dmarc@${mainDomain};`);
-            row.find('input[name="dmarc_name[]"]').val(`_dmarc.crm.${mainDomain}`);
+                if (mainDomain) {
+                    row.find('input[name="bimi_value[]"]').val(`v=BIMI1; l=https://www.${mainDomain}/img/${mainDomain}-logo.svg;`);
+                    row.find('input[name="bimi_name[]"]').val(`default._bimi.${mainDomain}`);
+                    row.find('input[name="dmarc_value[]"]').val(`v=DMARC1; p=reject; rua=mailto:dmarc@${mainDomain};`);
+                    row.find('input[name="dmarc_name[]"]').val(`_dmarc.crm.${mainDomain}`);
+                }
+
+                if (sendingDomain) {
+                    row.find('input[name="emailanalyst_dns_txt[]"]').val(`_analyst_ng_validation.${sendingDomain}`);
+                }
+            });
         }
 
-        if (sendingDomain) {
-            row.find('input[name="emailanalyst_dns_txt[]"]').val(`_analyst_ng_validation.${sendingDomain}`);
-        }
-    });
-}
-
-// Call on page load and when inputs change
-$(document).ready(function () {
-    autoFillDerivedValues();
-    $('#companyDataTable').on('input', 'input[name="main_domain[]"], input[name="sending_domain[]"]', autoFillDerivedValues);
-});
+        // Call on page load and when inputs change
+        $(document).ready(function () {
+            autoFillDerivedValues();
+            $('#companyDataTable').on('input', 'input[name="main_domain[]"], input[name="sending_domain[]"]', autoFillDerivedValues);
+        });
 
         $(document).ready(function () {
             $('#saveChangesBtn').on('click', function () {

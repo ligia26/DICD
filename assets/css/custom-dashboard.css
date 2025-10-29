@@ -1,0 +1,202 @@
+/* SIDEBAR */
+.sidebar-wrapper {
+    background: linear-gradient(180deg, #0c5a8a 0%, #094366 100%) !important;
+    width: 234px !important;
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    height: 100vh !important;
+    z-index: 1000 !important;
+}
+
+
+.sidebar-header {
+    background: #094366 !important;
+    padding: 20px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    width: 234px !important;
+    box-sizing: border-box !important;
+}
+
+.sidebar-header .logo-text {
+    width: 100% !important;
+    display: block !important;
+}
+
+.sidebar-header img {
+    max-width: 140px !important;
+    max-height: 40px !important;
+    filter: brightness(0) invert(1) !important;
+    display: block !important;
+}
+.sidebar-wrapper .metismenu {
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+}
+.sidebar-wrapper .metismenu a {
+    padding: 14px 20px 14px 20px !important; /* 14px top/bottom, 20px left/right */
+}
+
+
+
+
+
+.sidebar-wrapper .metismenu a {
+    color: rgba(255, 255, 255, 0.9) !important;
+    padding: 14px 20px !important;
+}
+
+.sidebar-wrapper .metismenu a:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* SUBMENUS - HIDDEN BY DEFAULT */
+.sidebar-wrapper .metismenu ul {
+    display: none !important;
+    background: rgba(0, 0, 0, 0.25) !important;
+}
+
+.sidebar-wrapper .metismenu li.mm-active > ul {
+    display: block !important;
+}
+
+.sidebar-wrapper .metismenu ul li a {
+    padding-left: 55px !important;
+    font-size: 13px !important;
+}
+
+/* SIDEBAR FOOTER */
+.sidebar-footer {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 234px !important;
+    padding: 15px !important;
+    background: rgba(0, 0, 0, 0.2) !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    text-align: center !important;
+}
+
+/* PAGE WRAPPER - BLUE BORDER */
+.page-wrapper {
+    margin-left: 234px !important;
+    border: 3px solid #0c5a8a !important;
+    border-left: none !important;
+}
+
+/* DASHBOARD CARDS */
+.dashboard-card {
+    background: white !important;
+    border-radius: 12px !important;
+    padding: 24px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    margin-bottom: 24px !important;
+}
+
+/* CIRCULAR PROGRESS */
+.circular-progress {
+    width: 160px !important;
+    height: 160px !important;
+    margin: 20px auto !important;
+    position: relative !important;
+}
+
+.circular-progress-svg {
+    width: 160px !important;
+    height: 160px !important;
+    transform: rotate(-90deg) !important;
+}
+
+.circular-progress-circle {
+    fill: none !important;
+    stroke: #e8e8e8 !important;
+    stroke-width: 10 !important;
+}
+
+.circular-progress-fill {
+    fill: none !important;
+    stroke: #0c5a8a !important;
+    stroke-width: 10 !important;
+    stroke-dasharray: 440 !important;
+    stroke-dashoffset: 44 !important;
+    transition: stroke-dashoffset 1s !important;
+}
+
+.circular-progress-text {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+}
+
+.circular-progress-number {
+    font-size: 48px !important;
+    font-weight: 700 !important;
+    color: #0c5a8a !important;
+}
+
+.circular-progress-label {
+    font-size: 14px !important;
+    color: #666 !important;
+}
+
+/* PROGRESS BARS */
+/* PROGRESS BARS - FIX PERCENTAGE POSITION */
+/* PROGRESS BARS - FIX PERCENTAGE POSITION */
+.progress-bar-custom {
+    height: 8px !important;
+    background: #e8e8e8 !important;
+    border-radius: 10px !important;
+    margin-top: 35px !important;
+    width: 100% !important;
+    position: relative !important;
+}
+
+.progress-fill {
+    height: 8px !important;
+    background: linear-gradient(90deg, #0c5a8a 0%, #1a7ab5 100%) !important;
+    border-radius: 10px !important;
+    transition: width 1s !important;
+}
+
+.progress-text {
+    position: absolute !important;
+    top: -25px !important;
+    right: 0 !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #0c5a8a !important;
+    white-space: nowrap !important;
+}
+
+/* BUTTONS */
+.btn-upgrade, .btn-activate {
+    background: #0c5a8a !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 8px 20px !important;
+}
+
+.btn-upgrade:hover, .btn-activate:hover {
+    background: #094366 !important;
+}
+
+/* STATS */
+.large-number {
+    font-size: 48px !important;
+    font-weight: 700 !important;
+    color: #1a1a1a !important;
+}
+
+.stat-label {
+    font-size: 14px !important;
+    color: #666 !important;
+}
+
+.stat-value {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: #1a1a1a !important;
+}
