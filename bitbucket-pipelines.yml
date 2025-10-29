@@ -1,16 +1,9 @@
-
-
-
 image: atlassian/default-image:4
 
 pipelines:
-  branches:
-    main:
-      - step:
-          name: Deploy to Ubuntu
-          script:
-            - apt-get update && apt-get install -y rsync openssh-client
-            - mkdir -p ~/.ssh
-            - chmod 700 ~/.ssh
-            - ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
-            - rsync -avz --delete ./ $SERVER_USER@$SERVER_IP:/var/www/new
+  default:
+    - step:
+        name: Test SSH connectivity
+        script:
+          - apt-get update && apt-get install -y openssh-client
+          - ssh -vvv -o StrictHostKeyChecking=no root@149.102.137.255 "echo  Connected successfully!"
