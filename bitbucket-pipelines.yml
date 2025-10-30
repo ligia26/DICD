@@ -1,8 +1,11 @@
+image: atlassian/default-image:4
+
 pipelines:
   branches:
-    '**':   # This triggers the pipeline on push to any branch
+    '**':
       - step:
-          name: Test SSH connectivity
+          name: Deploy to Ubuntu
           script:
             - apt-get update && apt-get install -y openssh-client
-            - ssh -vvv -o StrictHostKeyChecking=no root@49.12.34.28 "echo Connected successfully!"
+            - chmod 600 /opt/atlassian/pipelines/agent/ssh/id_rsa
+            - ssh -o StrictHostKeyChecking=no root@49.12.34.28 "echo Connected successfully!"
