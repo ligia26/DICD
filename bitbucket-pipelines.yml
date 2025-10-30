@@ -7,5 +7,4 @@ pipelines:
           name: Deploy to Ubuntu
           script:
             - apt-get update && apt-get install -y openssh-client
-            - chmod 600 /opt/atlassian/pipelines/agent/ssh/id_rsa
             - ssh -o StrictHostKeyChecking=no root@49.12.34.28 "echo Connected successfully!"
