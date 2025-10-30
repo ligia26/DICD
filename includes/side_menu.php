@@ -28,7 +28,7 @@
                 <div class="menu-title">Applications</div>
             </a>
             <ul>
-
+  
                 <li><a href="mautic_stack.php"><i class='bx bx-radio-circle'></i>Mautic Stack</a></li>
                 <li><a href="vdms_suite.php"><i class='bx bx-radio-circle'></i> VDMS Suite</a></li>
                 <li><a href=".php"><i class='bx bx-radio-circle'></i> Data Cleaning Hub</a></li>
