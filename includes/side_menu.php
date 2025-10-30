@@ -39,7 +39,7 @@
 
         <!-- Monitoring -->
         <li>
-            <a href="monitor.php">
+            <a href="Service_Health_Center.php">
                 <div class="parent-icon"><i class='bx bx-desktop'></i></div>
                 <div class="menu-title">Monitoring</div>
             </a>
@@ -127,9 +127,7 @@
                     <div class="menu-title">Manual Rules</div>
                 </a>
                 <ul>
-                    <li><a href="rules_list.php"><i class='bx bx-radio-circle'></i> Rules List</a></li>
-                    <li><a href="rules_list_v2.php"><i class='bx bx-radio-circle'></i> Rules List V2</a></li>
-                    <li><a href="rules_list_v4.php"><i class='bx bx-radio-circle'></i> Rules List V4</a></li>
+                    <li><a href="rules_list7.php"><i class='bx bx-radio-circle'></i> Rules List</a></li>
                     <li><a href="domain_impact.php"><i class='bx bx-radio-circle'></i> Domain Impact</a></li>
                     <li><a href="rules_list_cat.php"><i class='bx bx-radio-circle'></i> Rules Categories List</a></li>
                 </ul>
