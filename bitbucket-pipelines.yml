@@ -1,9 +1,8 @@
-image: atlassian/default-image:4
-
 pipelines:
-  default:
-    - step:
-        name: Test SSH connectivity
-        script:
-          - apt-get update && apt-get install -y openssh-client
-          - ssh -vvv -o StrictHostKeyChecking=no root@49.12.34.28 "echo  Connected successfully!"
+  branches:
+    '**':   # This triggers the pipeline on push to any branch
+      - step:
+          name: Test SSH connectivity
+          script:
+            - apt-get update && apt-get install -y openssh-client
+            - ssh -vvv -o StrictHostKeyChecking=no root@49.12.34.28 "echo Connected successfully!"
