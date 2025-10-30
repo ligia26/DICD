@@ -4,7 +4,7 @@ pipelines:
   branches:
     '**':
       - step:
-          name: Deploy to Ubuntu
+          name: Upload to Ubuntu server
           script:
-            - apt-get update && apt-get install -y openssh-client
-            - ssh -o StrictHostKeyChecking=no root@49.12.34.28 "echo Connected successfully!"
+            - apt-get update && apt-get install -y openssh-client rsync
+            - rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" ./ root@49.12.34.28:/var/www/new
