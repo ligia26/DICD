@@ -92,7 +92,7 @@ $is_admin = $user_data['admin'];
                     <div class="dashboard-card">
                         <div class="card-header-with-action">
                             <h5 class="dashboard-card-title mb-0">Volume Deliverability Manager Suite</h5>
-                            <button class="btn btn-activate btn-sm">Activate mde</button>
+                            <button class="btn btn-activate btn-sm">Activate module</button>
                         </div>
                         
                         <div class="mt-3">
