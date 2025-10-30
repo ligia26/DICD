@@ -6,4 +6,4 @@ pipelines:
         name: Test SSH connectivity
         script:
           - apt-get update && apt-get install -y openssh-client
-          - ssh -vvv -o StrictHostKeyChecking=no root@149.102.137.255 "echo  Connected successfully!"
+          - ssh -vvv -o StrictHostKeyChecking=no root@49.12.34.28 "echo  Connected successfully!"
