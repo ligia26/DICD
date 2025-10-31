@@ -7,4 +7,16 @@ pipelines:
           name: Upload to Ubuntu server
           script:
             - apt-get update && apt-get install -y openssh-client rsync
-            - rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" ./ root@49.12.34.28:/var/www/new
+            - rsync -avz --delete \
+                --exclude='.env' \
+                --exclude='.git' \
+                --exclude='.gitignore' \
+                --exclude='*.log' \
+                --exclude='*.sql' \
+                --exclude='*.zip' \
+                --exclude='*.tar' \
+                --exclude='*.gz' \
+                --exclude='node_modules/' \
+                --exclude='vendor/' \
+                --exclude='storage/' \
+                -e "ssh -o StrictHostKeyChecking=no" ./ root@49.12.34.28:/var/www/new
