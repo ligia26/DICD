@@ -20,3 +20,4 @@ pipelines:
                 --exclude='vendor/' \
                 --exclude='storage/' \
                 -e "ssh -o StrictHostKeyChecking=no" ./ root@49.12.34.28:/var/www/new
+
