@@ -159,6 +159,7 @@ function getSavedData($conn, $domain, $filter_by) {
         // for user_domain
         $sql = "SELECT * FROM config_changes WHERE user_domain = ? ORDER BY id DESC";
     }
+   
 
     $stmt = $conn->prepare($sql);
     if ($stmt) {
@@ -179,91 +180,92 @@ function getSavedData($conn, $domain, $filter_by) {
     }
 }
 
-function getSavedData_2($conn, $domain, $filter_by) {
-        // If user has selected "All domains" (meaning $domain is empty), simply return all rows.
-        if ($domain === '') {
-            $sql = "SELECT c.*,
-            s3.click_rate,
-            s3.open_rate,
-            s3.bounce_rate,
-            s3.last_update,
-            s3.sent_amount,
-            s3.current_auto_rule AS auto_rule_s3
-     FROM config_changes c
-     LEFT JOIN config_changes_s3_data s3 
-            ON c.sending_domain = s3.sending_domain
-           AND c.user_domain   = s3.user_domain
-           AND c.country       = s3.country
-     ORDER BY c.id DESC";
-
-
-$stmt = $conn->prepare($sql);
-            if ($stmt) {
-                $stmt->execute();
-                $result = $stmt->get_result();
-                $data = [];
-                while ($row = $result->fetch_assoc()) {
-                    $data[] = $row;
-                }
-                $stmt->close();
-                return $data;
-            } else {
-                error_log("SQL error: " . $conn->error);
-                return false;
-            }
-        } else {
-             if ($filter_by === 'sending_domain') {
-                $sql = "SELECT c.*,
-                s3.click_rate,
-                s3.open_rate,
-                s3.bounce_rate,
-                s3.last_update,
-                            s3.sent_amount,
-
-                s3.current_auto_rule AS auto_rule_s3
-         FROM config_changes c
-         LEFT JOIN config_changes_s3_data s3 
-                ON c.sending_domain = s3.sending_domain
-               AND c.user_domain   = s3.user_domain
-               AND c.country       = s3.country
-         WHERE c.sending_domain = ?
-         ORDER BY c.id DESC";
-              } else {
-                 // for user_domain
-                 $sql = "SELECT c.*,
-                 s3.click_rate,
-                 s3.open_rate,
-                 s3.bounce_rate,
-                 s3.last_update,
-                             s3.sent_amount,
-
-                 s3.current_auto_rule AS auto_rule_s3
-          FROM config_changes c
-          LEFT JOIN config_changes_s3_data s3 
-                 ON c.sending_domain = s3.sending_domain
-                AND c.user_domain   = s3.user_domain
-                AND c.country       = s3.country
-          WHERE c.user_domain = ?
-          ORDER BY c.id DESC";
-               }
+/**
+ * Fetches saved config data, fully filtered by all user selections.
+ *
+ * @param mysqli $conn The database connection
+ * @param string $selected_domain The specific domain to filter by
+ * @param string $filter_by (No longer used, but kept for compatibility)
+ * @param string $selected_company The company name to filter by
+ * @param string $selected_user_domain The user domain to filter by
+ * @return array|bool
+ */
+function getSavedData_2($conn, $selected_domain, $filter_by, $selected_company = '', $selected_user_domain = '') {
     
-             $stmt = $conn->prepare($sql);
-             if ($stmt) {
-                 $stmt->bind_param("s", $domain);
-                 $stmt->execute();
-                 $result = $stmt->get_result();
-                 $data = [];
-                 while ($row = $result->fetch_assoc()) {
-                     $data[] = $row;
-                 }
-                 $stmt->close();
-                 return $data;
-             } else {
-                 error_log("SQL error: " . $conn->error);
-                 return false;
-             }
-         }
+    // Base query with all JOINs
+    $sql = "SELECT c.*,
+                   s3.click_rate,
+                   s3.open_rate,
+                   s3.bounce_rate,
+                   s3.last_update,
+                   s3.sent_amount,
+                   s3.current_auto_rule AS auto_rule_s3
+            FROM config_changes c
+            LEFT JOIN config_changes_s3_data s3 
+                   ON c.sending_domain = s3.sending_domain
+                  AND c.user_domain   = s3.user_domain
+                  AND c.country       = s3.country
+            LEFT JOIN sending_domains sd ON c.sending_domain = sd.domain";
+
+    $params = [];
+    $param_types = '';
+    $where_clauses = [];
+
+    // --- Build the WHERE clauses based on filters ---
+
+    if (!empty($selected_domain)) {
+        // Priority 1: Filter by specific sending domain
+        $where_clauses[] = "c.sending_domain = ?";
+        $param_types .= 's';
+        $params[] = $selected_domain;
+
+    } elseif (!empty($selected_company)) {
+        // Priority 2: Filter by company
+        $where_clauses[] = "sd.company_name = ?";
+        $param_types .= 's';
+        $params[] = $selected_company;
     }
+    
+    // *** THIS IS THE IMPORTANT PART ***
+    // AND ALSO filter by user_domain if it's selected
+    if (!empty($selected_user_domain)) {
+         $where_clauses[] = "c.user_domain = ?";
+         $param_types .= 's';
+         $params[] = $selected_user_domain;
+    }
+    // *** END OF IMPORTANT PART ***
+
+
+    // --- Append WHERE clauses if any ---
+    if (count($where_clauses) > 0) {
+        $sql .= " WHERE " . implode(' AND ', $where_clauses);
+    }
+
+    $sql .= " ORDER BY c.id DESC";
+
+    $stmt = $conn->prepare($sql);
+    
+    if (!$stmt) {
+        error_log("SQL Error in getSavedData_2: " . $conn->error . " (Query: $sql)");
+        return false;
+    }
+
+    // Bind parameters if they exist
+    if (!empty($param_types)) {
+        $stmt->bind_param($param_types, ...$params);
+    }
+
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    $data = [];
+    while ($row = $result->fetch_assoc()) {
+        $data[] = $row; // Return an array
+    }
+    $stmt->close();
+    
+    return $data;
+}
     
 
 
