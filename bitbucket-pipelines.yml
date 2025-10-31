@@ -2,11 +2,21 @@ image: atlassian/default-image:4
 
 pipelines:
   branches:
-    '**':
+    "**":
       - step:
           name: Upload to Ubuntu server
           script:
             - apt-get update && apt-get install -y openssh-client rsync
+
+            #  Load SSH key
+            - mkdir -p ~/.ssh
+            - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+            - chmod 600 ~/.ssh/id_rsa
+
+            #  Test SSH connection (no host key writing)
+            - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SERVER_USER@$SERVER_IP "echo Connected OK"
+
+            #  Deployment command with exclusions
             - rsync -avz --delete \
                 --exclude='.env' \
                 --exclude='.git' \
@@ -19,5 +29,4 @@ pipelines:
                 --exclude='node_modules/' \
                 --exclude='vendor/' \
                 --exclude='storage/' \
-                -e "ssh -o StrictHostKeyChecking=no" ./ root@49.12.34.28:/var/www/new
-
+                -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" ./ $SERVER_USER@$SERVER_IP:/var/www/new
