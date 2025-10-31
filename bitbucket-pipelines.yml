@@ -8,28 +8,28 @@ pipelines:
           script:
             - apt-get update && apt-get install -y openssh-client rsync
 
-            # Load SSH key
+            # Load SSH Key
             - mkdir -p ~/.ssh
             - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
             - chmod 600 ~/.ssh/id_rsa
-
-            # Trust server host key (preload to avoid verification errors)
             - ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
 
-            # Sanity check & ensure target dir exists
+            # Ensure server path exists
             - ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "mkdir -p /var/www/new && echo Connected OK"
 
-            # Deploy (preserve .env on server; exclude sensitive/dev files)
-            - RSYNC_RSH="ssh -o StrictHostKeyChecking=no" rsync -avz --delete \
-                --exclude='.env' \
-                --exclude='.git' \
-                --exclude='.gitignore' \
-                --exclude='*.log' \
-                --exclude='*.sql' \
-                --exclude='*.zip' \
-                --exclude='*.tar' \
-                --exclude='*.gz' \
-                --exclude='node_modules/' \
-                --exclude='vendor/' \
-                --exclude='storage/' \
-                ./ $SERVER_USER@$SERVER_IP:/var/www/new
+            # ✅ Correct rsync wrapped to avoid Bitbucket breaking command
+            - >
+              rsync -avz --delete
+              --exclude='.env'
+              --exclude='.git'
+              --exclude='.gitignore'
+              --exclude='*.log'
+              --exclude='*.sql'
+              --exclude='*.zip'
+              --exclude='*.tar'
+              --exclude='*.gz'
+              --exclude='node_modules/'
+              --exclude='vendor/'
+              --exclude='storage/'
+              -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+              ./ $SERVER_USER@$SERVER_IP:/var/www/new
