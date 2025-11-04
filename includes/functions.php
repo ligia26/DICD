@@ -191,8 +191,7 @@ function getSavedData($conn, $domain, $filter_by) {
  * @return array|bool
  */
 function getSavedData_2($conn, $selected_domain, $filter_by, $selected_company = '', $selected_user_domain = '') {
-    
-    // Base query with all JOINs
+
     $sql = "SELECT c.*,
                    s3.click_rate,
                    s3.open_rate,
@@ -205,68 +204,53 @@ function getSavedData_2($conn, $selected_domain, $filter_by, $selected_company =
                    ON c.sending_domain = s3.sending_domain
                   AND c.user_domain   = s3.user_domain
                   AND c.country       = s3.country
-            LEFT JOIN sending_domains sd ON c.sending_domain = sd.domain";
+            LEFT JOIN sending_domains sd ON c.sending_domain = sd.domain
+            LEFT JOIN companies comp ON sd.company = comp.id";
 
     $params = [];
-    $param_types = '';
-    $where_clauses = [];
-
-    // --- Build the WHERE clauses based on filters ---
+    $types  = [];
+    $where  = [];
 
     if (!empty($selected_domain)) {
-        // Priority 1: Filter by specific sending domain
-        $where_clauses[] = "c.sending_domain = ?";
-        $param_types .= 's';
-        $params[] = $selected_domain;
-
+        $where[] = "c.sending_domain = ?";
+        $params[] = $selected_domain; $types[] = 's';
     } elseif (!empty($selected_company)) {
-        // Priority 2: Filter by company
-        $where_clauses[] = "sd.company_name = ?";
-        $param_types .= 's';
-        $params[] = $selected_company;
+        // IMPORTANT: filter by companies.name via the JOIN above
+        $where[] = "comp.name = ?";
+        $params[] = $selected_company; $types[] = 's';
     }
-    
-    // *** THIS IS THE IMPORTANT PART ***
-    // AND ALSO filter by user_domain if it's selected
+
     if (!empty($selected_user_domain)) {
-         $where_clauses[] = "c.user_domain = ?";
-         $param_types .= 's';
-         $params[] = $selected_user_domain;
-    }
-    // *** END OF IMPORTANT PART ***
-
-
-    // --- Append WHERE clauses if any ---
-    if (count($where_clauses) > 0) {
-        $sql .= " WHERE " . implode(' AND ', $where_clauses);
+        $where[] = "c.user_domain = ?";
+        $params[] = $selected_user_domain; $types[] = 's';
     }
 
+    if ($where) {
+        $sql .= " WHERE " . implode(' AND ', $where);
+    }
     $sql .= " ORDER BY c.id DESC";
 
     $stmt = $conn->prepare($sql);
-    
     if (!$stmt) {
         error_log("SQL Error in getSavedData_2: " . $conn->error . " (Query: $sql)");
-        return false;
+        return []; // NEVER return false
     }
 
-    // Bind parameters if they exist
-    if (!empty($param_types)) {
-        $stmt->bind_param($param_types, ...$params);
+    if ($params) {
+        $stmt->bind_param(implode('', $types), ...$params);
     }
 
     $stmt->execute();
-    $result = $stmt->get_result();
-    
+    $res = $stmt->get_result();
     $data = [];
-    while ($row = $result->fetch_assoc()) {
-        $data[] = $row; // Return an array
+    if ($res instanceof mysqli_result) {
+        while ($row = $res->fetch_assoc()) { $data[] = $row; }
     }
     $stmt->close();
-    
     return $data;
 }
-    
+
+
 
 
 

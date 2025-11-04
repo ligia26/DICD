@@ -14,9 +14,9 @@ if (!isset($_SESSION['user_id'])) {
 }
 $user_id = $_SESSION['user_id']; 
 
-$selected_domain = isset($_POST['domain']) ? $_POST['domain'] : '';
-$selected_user_domain = isset($_POST['user_domain']) ? $_POST['user_domain'] : '';
-$selected_company = isset($_POST['company']) ? $_POST['company'] : '';
+$selected_domain      = $_POST['domain']      ?? null; if ($selected_domain      === '') $selected_domain = null;
+$selected_user_domain = $_POST['user_domain'] ?? null; if ($selected_user_domain === '') $selected_user_domain = null;
+$selected_company     = $_POST['company']     ?? null; if ($selected_company     === '') $selected_company = null;
 
 // --- Get User/Company Info (from your new file) ---
 $sql = "SELECT u.admin, u.company AS company_id, c.name AS company_name
@@ -39,7 +39,7 @@ $company = $user_data['company_name'];
 
 
 $last_update_result = getLastUpdatess($conn, $selected_domain);
-$domain_result = getSendingDomains_2($conn, $company, $is_admin, $selected_company, $selected_user_domain);
+$domain_result = getSendingDomains_2($conn, $user_company_id, $is_admin, $selected_company);
 $user_domain_result = getUserDomains($conn);
 
 $category_result = getCategories($conn);
@@ -207,41 +207,61 @@ function getLastUpdatess($conn, $domain) {
                             </select>
                             </div>
                             
-                            <div class="col-md-3">
-                                <label class="form-label fw-bold mb-1">
-                                    <i class="fas fa-globe"></i> Filter by Domain
-                                </label>
-                                <select class="form-select form-select-sm" name="domain" onchange="document.getElementById('domain-filter-form').submit()">
-                                    <?php
+                           <div class="col-md-3">
+                            <label class="form-label fw-bold mb-1">
+                                <i class="fas fa-globe"></i> Filter by Domain
+                            </label>
+                            <select class="form-select form-select-sm" name="domain" onchange="document.getElementById('domain-filter-form').submit()">
+                                <?php
+                                // Always render the "All" option
+                                echo '<option value="">All Sending Domains</option>';
+
+                                // Only touch the result if it's a real mysqli_result
+                                if ($domain_result instanceof mysqli_result && $domain_result->num_rows > 0) {
+                                    // reset pointer just in case we read it before
                                     $domain_result->data_seek(0);
-                                    echo "<option value=''>All Sending Domains</option>";
-                                    if ($domain_result->num_rows > 0) {
-                                        while($domain_row = $domain_result->fetch_assoc()) {
-                                            $selected = ($selected_domain == $domain_row['domain']) ? "selected" : "";
-                                            echo "<option value='{$domain_row['domain']}' $selected>{$domain_row['domain']} ({$domain_row['company_name']})</option>";
-                                        }
+
+                                    while ($domain_row = $domain_result->fetch_assoc()) {
+                                        $valDomain = htmlspecialchars($domain_row['domain'] ?? '', ENT_QUOTES, 'UTF-8');
+                                        $labelCompany = htmlspecialchars($domain_row['company_name'] ?? '', ENT_QUOTES, 'UTF-8');
+
+                                        // selected if currently chosen
+                                        $isSelected = ($selected_domain !== null && $selected_domain === ($domain_row['domain'] ?? '')) ? 'selected' : '';
+
+                                        echo "<option value=\"{$valDomain}\" {$isSelected}>{$valDomain}" .
+                                            ($labelCompany !== '' ? " ({$labelCompany})" : "") .
+                                            "</option>";
                                     }
-                                    ?>
-                                </select>
+                                }
+                                ?>
+                            </select>
                             </div>
+
                             
                             <div class="col-md-3">
-                                <label class="form-label fw-bold mb-1">
-                                    <i class="fas fa-at"></i> Filter by User Domain
-                                </label>
-                                <select class="form-select form-select-sm" name="user_domain" onchange="document.getElementById('domain-filter-form').submit()">
-                                    <option value="">All User Domains</option>
-                                    <?php
+                            <label class="form-label fw-bold mb-1">
+                                <i class="fas fa-at"></i> Filter by User Domain
+                            </label>
+                            <select class="form-select form-select-sm" name="user_domain" onchange="document.getElementById('domain-filter-form').submit()">
+                                <?php
+                                // Always render the "All" option
+                                echo '<option value="">All User Domains</option>';
+
+                                if ($user_domain_result instanceof mysqli_result && $user_domain_result->num_rows > 0) {
                                     $user_domain_result->data_seek(0);
-                                    while($user_domain_row = $user_domain_result->fetch_assoc()) {
-                                        $domain_name_2 = $user_domain_row['name'];
-                                        $selectedUD = ($selected_user_domain == $domain_name_2) ? "selected" : "";
-                                        echo "<option value='$domain_name_2' $selectedUD>$domain_name_2</option>";
+
+                                    while ($user_domain_row = $user_domain_result->fetch_assoc()) {
+                                        $name = $user_domain_row['name'] ?? '';
+                                        $valName = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
+                                        $isSelected = ($selected_user_domain !== null && $selected_user_domain === $name) ? 'selected' : '';
+
+                                        echo "<option value=\"{$valName}\" {$isSelected}>{$valName}</option>";
                                     }
-                                    ?>
-                                </select>
+                                }
+                                ?>
+                            </select>
                             </div>
-                            
+
                             <div class="col-md-3">
                                 <div class="position-relative">
                                     <i class="fas fa-search position-absolute" style="left: 0.75rem; top: 50%; transform: translateY(-50%); color: #6c757d;"></i>

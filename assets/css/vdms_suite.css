@@ -1,4 +1,6 @@
-/* VDMS Suite Styles */
+/* ===========================================================
+   VDMS Suite Styles (Blue Theme)
+   =========================================================== */
 
 body {
     background-color: #f5f7fa;
@@ -6,8 +8,9 @@ body {
     font-size: 13px;
 }
 
+
 .page-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0c5a8a 0%, #094366 100%);
     color: white;
     padding: 1.5rem;
     margin-bottom: 1.5rem;
@@ -22,6 +25,7 @@ body {
     margin-bottom: 1.5rem;
 }
 
+
 .rule-card {
     background: white;
     border-radius: 12px;
@@ -29,7 +33,7 @@ body {
     margin-bottom: 0.75rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.06);
     transition: all 0.2s ease;
-    border-left: 4px solid #667eea;
+    border-left: 4px solid #0c5a8a;
 }
 
 .rule-card:hover {
@@ -38,11 +42,11 @@ body {
 }
 
 .rule-card.selected {
-    border-left-color: #28a745;
-    background-color: #f8fff9;
+    border-left-color: #094366;
+    background-color: rgba(12, 90, 138, 0.06);
 }
 
-/* Horizontal layout matching the image */
+
 .rule-header {
     display: flex;
     align-items: center;
@@ -80,7 +84,7 @@ body {
     white-space: nowrap;
 }
 
-/* Specific column widths to match image */
+
 .col-sending-domain { min-width: 150px; }
 .col-user-domain { min-width: 90px; }
 .col-country { min-width: 60px; }
@@ -93,8 +97,9 @@ body {
 .col-dsli { min-width: 60px; }
 .col-status { min-width: 90px; margin-left: auto; }
 
+
 .domain-badge {
-    background: #667eea;
+    background: #0c5a8a;
     color: white;
     padding: 0.35rem 0.7rem;
     border-radius: 20px;
@@ -138,8 +143,8 @@ body {
 }
 
 .health-good {
-    background: #d1ecf1;
-    color: #0c5460;
+    background: rgba(26, 122, 181, 0.12);
+    color: #094366;
 }
 
 .health-warning {
@@ -152,13 +157,14 @@ body {
     color: #721c24;
 }
 
+
 .status-badge {
     padding: 0.35rem 0.7rem;
     border-radius: 4px;
     font-size: 11px;
     font-weight: 600;
     white-space: nowrap;
-    background: #6c757d;
+    background: #094366;
     color: white;
 }
 
@@ -190,10 +196,11 @@ body {
 }
 
 .expand-btn:hover {
-    background: #667eea;
+    background: #0c5a8a;
     color: white;
-    border-color: #667eea;
+    border-color: #0c5a8a;
 }
+
 
 .rule-details {
     display: grid;
@@ -231,23 +238,25 @@ body {
     color: #2c3e50;
 }
 
+
 .last-update-banner {
     background: #e7f3ff;
     padding: 0.75rem 1rem;
     border-radius: 6px;
     margin-bottom: 1rem;
-    border-left: 4px solid #0056b3;
+    border-left: 4px solid #0c5a8a;
     font-size: 13px;
 }
+
 
 @media (max-width: 1600px) {
     .rule-header {
         flex-wrap: wrap;
     }
 }
-/* In vdms_suite.css */
 
 .rule-header .header-col {
-    flex-shrink: 1; /* Allows this item to shrink if the row is full */
-    min-width: 0;   /* A classic fix that allows flex items to shrink below their content's size */
+    flex-shrink: 1;
+    min-width: 0;
 }
+
