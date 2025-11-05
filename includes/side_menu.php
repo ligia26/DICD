@@ -10,15 +10,8 @@
   <!-- Only the menu scrolls -->
   <div class="sidebar-scroll" data-simplebar>
     <ul class="metismenu" id="menu">
-      <!-- Dashboard FIRST -->
-      <li id="dashboard-li">
-        <a href="dashboard_new.php">
-          <div class="parent-icon"><i class='bx bx-desktop'></i></div>
-          <div class="menu-title">Dashboard</div>
-        </a>
-      </li>
+      
 
-      <!-- Clients Setup -->
       <li>
         <a href="dashboard_new.php">
           <div class="parent-icon"><i class='bx bx-desktop'></i></div>
@@ -94,22 +87,8 @@
         </ul>
       </li>
 
-      <!-- Admin-only (hidden examples) -->
-      <?php if (!empty($_SESSION['user_role']) && (int)$_SESSION['user_role'] === 1): ?>
-        <li style="display:none;">
-          <a class="has-arrow" href="javascript:;">
-            <div class="parent-icon"><i class="bx bx-recycle"></i></div>
-            <div class="menu-title">Cleaning Service</div>
-          </a>
-          <ul>
-            <li><a href="email_validator_csv.php"><i class='bx bx-radio-circle'></i> Emails Bulk Cleaning</a></li>
-            <li><a href="email_validator_csv_new.php"><i class='bx bx-radio-circle'></i> Emails Bulk Cleaning V2</a></li>
-            <li><a href="email_validator.php"><i class='bx bx-radio-circle'></i> Emails Cleaning</a></li>
-            <li><a href="domain_validator.php"><i class='bx bx-radio-circle'></i> Domain Cleaning</a></li>
-            <li><a href="domain_validator_blacklist.php"><i class='bx bx-radio-circle'></i> Domains BlackListed</a></li>
-          </ul>
-        </li>
-      <?php endif; ?>
+
+    
     </ul>
   </div>
 </div>
