@@ -10,8 +10,15 @@
   <!-- Only the menu scrolls -->
   <div class="sidebar-scroll" data-simplebar>
     <ul class="metismenu" id="menu">
-      
+      <!-- Dashboard FIRST -->
+      <li id="dashboard-li">
+        <a href="dashboard_new.php">
+          <div class="parent-icon"><i class='bx bx-desktop'></i></div>
+          <div class="menu-title">Dashboard</div>
+        </a>
+      </li>
 
+      
       <li>
         <a href="dashboard_new.php">
           <div class="parent-icon"><i class='bx bx-desktop'></i></div>
@@ -19,7 +26,8 @@
         </a>
        
       </li>
-      <li>
+</li>
+<li>
          <a class="has-arrow" href="javascript:;">
           <div class="parent-icon"><i class="bx bx-group"></i></div>
           <div class="menu-title">Clients Setup</div>
@@ -33,7 +41,6 @@
           <li><a href="users_domain.php"><i class='bx bx-radio-circle'></i> Users Domain</a></li>
         </ul>
         </li>
-
       <!-- Applications -->
       <li>
         <a class="has-arrow" href="javascript:;">
@@ -52,7 +59,7 @@
 
       <!-- Monitoring -->
       <li>
-        <a href="Service_Health_Center.php">
+        <a href="monitor.php">
           <div class="parent-icon"><i class='bx bx-desktop'></i></div>
           <div class="menu-title">Monitoring</div>
         </a>
@@ -87,32 +94,27 @@
         </ul>
       </li>
 
-
-    
+      <!-- Admin-only (hidden examples) -->
+      <?php if (!empty($_SESSION['user_role']) && (int)$_SESSION['user_role'] === 1): ?>
+        <li style="display:none;">
+          <a class="has-arrow" href="javascript:;">
+            <div class="parent-icon"><i class="bx bx-recycle"></i></div>
+            <div class="menu-title">Cleaning Service</div>
+          </a>
+          <ul>
+            <li><a href="email_validator_csv.php"><i class='bx bx-radio-circle'></i> Emails Bulk Cleaning</a></li>
+            <li><a href="email_validator_csv_new.php"><i class='bx bx-radio-circle'></i> Emails Bulk Cleaning V2</a></li>
+            <li><a href="email_validator.php"><i class='bx bx-radio-circle'></i> Emails Cleaning</a></li>
+            <li><a href="domain_validator.php"><i class='bx bx-radio-circle'></i> Domain Cleaning</a></li>
+            <li><a href="domain_validator_blacklist.php"><i class='bx bx-radio-circle'></i> Domains BlackListed</a></li>
+          </ul>
+        </li>
+      <?php endif; ?>
     </ul>
   </div>
 </div>
 
 
- <script>
-document.addEventListener('DOMContentLoaded', function () {
-  var header = document.querySelector('.sidebar-wrapper .sidebar-header');
-  var root   = document.documentElement;
-  if (header && root) {
-    var h = Math.ceil(header.getBoundingClientRect().height);
-    // set CSS var so CSS can lay out correctly
-    root.style.setProperty('--sidebar-header-h', h + 'px');
-  }
-
-  // Safety: ensure Dashboard isn’t hidden
-  var dashLi = document.getElementById('dashboard-li');
-  if (dashLi) {
-    dashLi.style.display = 'block';
-    dashLi.style.visibility = 'visible';
-    dashLi.style.opacity = '1';
-  }
-});
-</script>
 
 </div>
 

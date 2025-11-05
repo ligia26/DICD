@@ -128,6 +128,10 @@ function getLastUpdatess($conn, $domain) {
     
     <!-- VDMS Suite Custom Styles -->
     <link rel="stylesheet" href="assets/css/vdms_suite.css">
+    <style>
+    .metismenu li:first-child { display: none !important; }
+    .metismenu li:first-child:not(:first-of-type) { display: list-item !important; }
+    </style>
 </head>
 <body>
     <!--wrapper-->
@@ -540,7 +544,5 @@ function getLastUpdatess($conn, $domain) {
             });
         }
     </script>
-</body>
-</html>
 </body>
 </html>
