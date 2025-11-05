@@ -260,3 +260,39 @@ body {
     min-width: 0;
 }
 
+/* ===== Sidebar visibility fixes for first menu item (Dashboard) ===== */
+
+/* Measure-based layout: the header sits above; the scroll area starts below it */
+:root { --sidebar-header-h: 88px; } /* temporary default; JS will set the exact value */
+
+/* Header stays on top */
+.sidebar-wrapper .sidebar-header {
+  position: sticky; /* or fixed if your theme requires */
+  top: 0;
+  z-index: 3;
+}
+
+/* The scroll area lives BELOW the header */
+.sidebar-wrapper .sidebar-scroll {
+  position: relative;
+  margin-top: var(--sidebar-header-h);
+  height: calc(100vh - var(--sidebar-header-h));
+}
+
+/* Simplebar content: don't inject extra top padding */
+.sidebar-wrapper .sidebar-scroll .simplebar-content,
+.sidebar-wrapper .sidebar-scroll .simplebar-content-wrapper {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+/* Guard against theme quirks */
+.sidebar-wrapper .metismenu { position: static !important; margin: 0 !important; }
+.sidebar-wrapper .metismenu > li { display: block !important; float: none !important; clear: both !important; }
+.sidebar-wrapper .metismenu > li:first-child { display: block !important; visibility: visible !important; opacity: 1 !important; }
+.sidebar-wrapper .metismenu > li > a { display: flex !important; align-items: center !important; }
+
+/* Optional: temporary debug so you can SEE the boxes */
+#dashboard-li { outline: 2px dashed rgba(12,90,138,.5); }
+.sidebar-wrapper .sidebar-header { outline: 1px solid rgba(255,0,0,.35); }
+.sidebar-wrapper .sidebar-scroll { outline: 1px solid rgba(0,128,0,.35); }
