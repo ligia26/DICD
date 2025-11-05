@@ -6,7 +6,6 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 require_once 'vendor/autoload.php';
-require_once 'includes/config.php';
 
 // Logger function
 function log_message($message) {
@@ -16,18 +15,14 @@ function log_message($message) {
 }
 
 log_message('Script started');
-
-try {
-    $client = new Google_Client();
-    $client->setClientId(Config::getRequired('GOOGLE_CLIENT_ID'));
-    $client->setClientSecret(Config::getRequired('GOOGLE_CLIENT_SECRET'));
-    $client->setRedirectUri(Config::getRequired('GOOGLE_REDIRECT_URI'));
-    $client->addScope("email");
-    $client->addScope("profile");
-} catch (Exception $e) {
-    log_message('Configuration error: ' . $e->getMessage());
-    die("Configuration error: " . $e->getMessage());
-}
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+$client = new Google_Client();
+$client->setClientId($_ENV['GOOGLE_CLIENT_ID']);
+$client->setClientSecret($_ENV['GOOGLE_CLIENT_SECRET']);
+$client->setRedirectUri($_ENV['GOOGLE_REDIRECT_URI']);
+$client->addScope("email");
+$client->addScope("profile");
 
 if (isset($_GET['code'])) {
     log_message('Authorization code received: ' . $_GET['code']);
@@ -49,12 +44,7 @@ if (isset($_GET['code'])) {
         log_message("User info retrieved: $email, $name");
 
         // Database connection
-        $host = Config::getRequired('DB_HOST');
-        $username = Config::getRequired('DB_USERNAME');
-        $password = Config::getRequired('DB_PASSWORD');
-        $dbname = Config::getRequired('DB_NAME');
-        
-        $conn = new mysqli($host, $username, $password, $dbname);
+        $conn = new mysqli('localhost', 'root', '0955321170', 'dashboard');
 
         if ($conn->connect_error) {
             log_message('Database connection failed: ' . $conn->connect_error);
