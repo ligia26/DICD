@@ -49,7 +49,7 @@
         </a>
         <ul>
           <li><a href="mautic_stack.php"><i class='bx bx-radio-circle'></i> Mautic Stack</a></li>
-          <li><a href="tableau_links.php"><i class='bx bx-radio-circle'></i> Tableau Analysis</a></li>
+          <li><a href="tableau_analysis.php"><i class='bx bx-radio-circle'></i> Tableau Analysis</a></li>
           <li><a href="vdms_suite.php"><i class='bx bx-radio-circle'></i> VDMS Suite</a></li>
           <li><a href="cleaning_report.php"><i class='bx bx-radio-circle'></i> Data Cleaning Hub</a></li>
           <li><a href="brandexpand.php"><i class='bx bx-radio-circle'></i> Brand Expand</a></li>
