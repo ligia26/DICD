@@ -83,15 +83,11 @@
 
       <!-- Invoice and Billing -->
       <li>
-        <a class="has-arrow" href="javascript:;">
+        <a href="holded.php">
           <div class="parent-icon"><i class='bx bx-cog'></i></div>
           <div class="menu-title">Invoice and Billing</div>
         </a>
-        <ul>
-          <li><a href="companies.php"><i class='bx bx-radio-circle'></i> Companies</a></li>
-          <li><a href="domains.php"><i class='bx bx-radio-circle'></i> Domains</a></li>
-          <li><a href="countries.php"><i class='bx bx-radio-circle'></i> Countries</a></li>
-        </ul>
+        
       </li>
 
       <!-- Admin-only (hidden examples) -->
