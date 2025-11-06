@@ -287,21 +287,43 @@ function loadDashboardData() {
             // Animate circular progress
             animateCircle(data.health_score || 0);
             
-            // Update Domain Health
+            // Update Domain Health (VDMS)
             $('#domain-health-bar').css('width', (data.domain_health || 0) + '%');
             $('#domain-health-bar .progress-text').text(Math.round(data.domain_health || 0) + '%');
             
-            // Update AI Content
+            // Update AI Content (BrandExpand - top card)
             $('#ai-content-bar').css('width', (data.ai_content_progress || 0) + '%');
             $('#ai-content-bar .progress-text').text(Math.round(data.ai_content_progress || 0) + '%');
             
-            // Update Validations
+            // Update Validations (Data Cleaning Hub)
             animateNumber($('#validations-count'), data.validations || 0);
             $('#validations-bar').css('width', (data.validations_progress || 0) + '%');
             
-            // Update AI Content Count
+            // Update AI Content Count (BrandExpand - bottom card)
             animateNumber($('#ai-content-count'), data.ai_content_count || 0);
             $('#ai-content-progress').css('width', (data.ai_content_bar || 0) + '%');
+            
+            // Update Warmy Metrics
+            if (data.warmy) {
+                $('#warmy-active-accounts').text(data.warmy.active_accounts || 0);
+                $('#warmy-emails-sent').text(formatNumber(data.warmy.emails_sent_today || 0));
+                $('#warmy-score').text((data.warmy.average_score || 0) + '%');
+                
+                const warmupProgress = data.warmy.warmup_progress || 0;
+                $('#warmy-progress-bar').css('width', warmupProgress + '%');
+                $('#warmy-progress-text').text(Math.round(warmupProgress) + '%');
+            }
+            
+            // Update Tableau Metrics
+            if (data.tableau) {
+                $('#tableau-reports').text(data.tableau.total_reports || 0);
+                $('#tableau-dashboards').text(data.tableau.active_dashboards || 0);
+                $('#tableau-last-update').text(data.tableau.last_update || '-');
+                
+                const dataFreshness = data.tableau.data_freshness || 0;
+                $('#tableau-progress-bar').css('width', dataFreshness + '%');
+                $('#tableau-progress-text').text(Math.round(dataFreshness) + '%');
+            }
             
             // Update Billing
             $('#current-plan').text(data.current_plan || 'Free Plan');

@@ -2,8 +2,7 @@
 <html lang="en">
 <?php
 include "includes/head.php"; 
-// NOTE: No DB used here. Keep your functions/auth includes if needed.
-// include 'includes/db.php';
+
 include 'includes/functions.php';
 
 session_start();
