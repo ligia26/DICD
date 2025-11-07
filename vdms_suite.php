@@ -46,7 +46,6 @@ $category_result = getCategories($conn);
 $all_categories = [];
 if ($category_result && $category_result->num_rows > 0) {
     while ($cat_row = $category_result->fetch_assoc()) {
-        
         $all_categories[] = $cat_row['cat_class']; 
     }
 }
@@ -129,8 +128,15 @@ function getLastUpdatess($conn, $domain) {
     <!-- VDMS Suite Custom Styles -->
     <link rel="stylesheet" href="assets/css/vdms_suite.css">
     <style>
-    .metismenu li:first-child { display: none !important; }
-    .metismenu li:first-child:not(:first-of-type) { display: list-item !important; }
+    /* Hide dashboard duplicate - target only the direct first child of #menu */
+    #menu > li:first-child {
+        display: none !important;
+    }
+
+    /* Make sure details are hidden when collapsed */
+    .rule-details.collapsed { 
+        display: none !important; 
+    }
     </style>
 </head>
 <body>
@@ -153,7 +159,7 @@ function getLastUpdatess($conn, $domain) {
                             <h2 class="mb-1"><i class="fas fa-cogs"></i> VDMS Suite - Rules Configuration</h2>
                             <p class="mb-0 opacity-75">Manage sending domains, user domains, and campaign rules</p>
                         </div>
-                        <button class="btn btn-light">
+                        <button class="btn btn-light" type="button">
                             <i class="fas fa-plus"></i> Add New Rule
                         </button>
                     </div>
@@ -177,7 +183,7 @@ function getLastUpdatess($conn, $domain) {
                                 <label class="form-label fw-bold mb-1">
                                     <i class="fas fa-building"></i> Filter by Company
                                 </label>
-                                <select class="form-select form-select-sm" name="company" onchange="document.getElementById('domain-filter-form').submit()">
+                                <select class="form-select form-select-sm" name="company" onchange="resetDomainAndSubmit(this)">
                                 <?php
                                 // --- New SQL query to get companies ---
                                 $sql_companies = "SELECT id, name FROM companies";
@@ -200,7 +206,6 @@ function getLastUpdatess($conn, $domain) {
                                 $stmt_companies->close();
                                 // --- End of new code ---
 
-                                // This part remains the same
                                 echo "<option value=''>All Companies</option>";
                                 while ($comp = $companies_result->fetch_assoc()) {
                                     $cname = $comp['name'];
@@ -215,21 +220,17 @@ function getLastUpdatess($conn, $domain) {
                             <label class="form-label fw-bold mb-1">
                                 <i class="fas fa-globe"></i> Filter by Domain
                             </label>
-                            <select class="form-select form-select-sm" name="domain" onchange="document.getElementById('domain-filter-form').submit()">
+                            <select class="form-select form-select-sm" name="domain" id="domainSelect" onchange="this.form.submit()">
                                 <?php
-                                // Always render the "All" option
                                 echo '<option value="">All Sending Domains</option>';
 
-                                // Only touch the result if it's a real mysqli_result
                                 if ($domain_result instanceof mysqli_result && $domain_result->num_rows > 0) {
-                                    // reset pointer just in case we read it before
                                     $domain_result->data_seek(0);
 
                                     while ($domain_row = $domain_result->fetch_assoc()) {
                                         $valDomain = htmlspecialchars($domain_row['domain'] ?? '', ENT_QUOTES, 'UTF-8');
                                         $labelCompany = htmlspecialchars($domain_row['company_name'] ?? '', ENT_QUOTES, 'UTF-8');
 
-                                        // selected if currently chosen
                                         $isSelected = ($selected_domain !== null && $selected_domain === ($domain_row['domain'] ?? '')) ? 'selected' : '';
 
                                         echo "<option value=\"{$valDomain}\" {$isSelected}>{$valDomain}" .
@@ -246,9 +247,8 @@ function getLastUpdatess($conn, $domain) {
                             <label class="form-label fw-bold mb-1">
                                 <i class="fas fa-at"></i> Filter by User Domain
                             </label>
-                            <select class="form-select form-select-sm" name="user_domain" onchange="document.getElementById('domain-filter-form').submit()">
+                            <select class="form-select form-select-sm" name="user_domain" onchange="this.form.submit()">
                                 <?php
-                                // Always render the "All" option
                                 echo '<option value="">All User Domains</option>';
 
                                 if ($user_domain_result instanceof mysqli_result && $user_domain_result->num_rows > 0) {
@@ -279,22 +279,14 @@ function getLastUpdatess($conn, $domain) {
                 <!-- Rules List -->
                 <div id="rulesList">
                     <?php
-                    // $saved_data_result is now an ARRAY containing the exact rows to print.
-                    // We just need one simple loop.
-                    
                     if ($saved_data_result !== false && count($saved_data_result) > 0) {
-                        
-                        // Loop ONCE through the pre-filtered data
                         foreach ($saved_data_result as $saved_row) {
-                            
-                            // Extract data for this card
                             $sending_domain = $saved_row['sending_domain'];
                             $user_domain_name = $saved_row['user_domain'];
                             
                             $country_short = isset($countries[$saved_row['country_id']]) ? $countries[$saved_row['country_id']]['short'] : 'N/A';
                             
-                            // Calculate health score (example calculation)
-                            $health_score = 75; // You can calculate this based on your metrics
+                            $health_score = 75;
                             $health_class = 'health-good';
                             if ($health_score >= 90) $health_class = 'health-excellent';
                             elseif ($health_score >= 70) $health_class = 'health-good';
@@ -387,7 +379,6 @@ function getLastUpdatess($conn, $domain) {
                                 <div class="header-col col-dsli">
                                     <span class="col-label">DSLI</span>
                                     <?php
-                                        // --- CHECK THIS: Is 'dsli' the correct column name?
                                         $current_dsli = $saved_row['dsli']; 
                                         $rule_id = $saved_row['id'];
                                     ?>
@@ -403,8 +394,6 @@ function getLastUpdatess($conn, $domain) {
                                 <div class="header-col col-status">
                                     <span class="col-label">Status</span>
                                     <?php
-                                        // --- CHECK THIS: What is the rule column called in your table? 
-                                        // I'm guessing 'category' or 'current_rule'.
                                         $current_rule = $saved_row['category'] ?? 'Auto'; 
                                         $rule_id = $saved_row['id'];
                                     ?>
@@ -417,7 +406,7 @@ function getLastUpdatess($conn, $domain) {
                                     </select>
                                 </div>
                                                                 
-                                <button class="expand-btn" onclick="toggleDetails(this)">
+                                <button class="expand-btn" type="button" onclick="toggleDetails(this); return false;">
                                     <i class="fas fa-chevron-down"></i> Details
                                 </button>
                             </div>
@@ -446,7 +435,6 @@ function getLastUpdatess($conn, $domain) {
                         } // End foreach loop
                         
                     } else {
-                        // This else block now correctly checks if the data array is empty
                         echo '<div class="alert alert-info">No rules found. Please adjust your filters.</div>';
                     }
                     ?>
@@ -470,17 +458,28 @@ function getLastUpdatess($conn, $domain) {
     </div>
     <!--end wrapper-->
 
-    <!-- Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <!-- Scripts -->
     <script src="assets/js/jquery.min.js"></script>
     <script src="assets/plugins/simplebar/js/simplebar.min.js"></script>
     <script src="assets/plugins/metismenu/js/metisMenu.min.js"></script>
     <script src="assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/app.js"></script>
     
     <script>
+        // Function to reset domain dropdown when company changes
+        function resetDomainAndSubmit(selectElement) {
+            document.getElementById('domainSelect').value = '';
+            selectElement.form.submit();
+        }
+        
         function toggleDetails(button) {
+            // Prevent any default behavior
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
             const card = button.closest('.rule-card');
             const details = card.querySelector('.rule-details');
             const icon = button.querySelector('i');
@@ -496,6 +495,8 @@ function getLastUpdatess($conn, $domain) {
                 icon.classList.add('fa-chevron-down');
                 button.innerHTML = '<i class="fas fa-chevron-down"></i> Details';
             }
+            
+            return false;
         }
         
         function toggleSelection(checkbox) {
@@ -525,24 +526,22 @@ function getLastUpdatess($conn, $domain) {
                 counter.style.display = 'none';
             }
         }
-        
-        // Search functionality
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            searchInput.addEventListener('input', function(e) {
-                const searchTerm = e.target.value.toLowerCase();
-                const cards = document.querySelectorAll('.rule-card');
-                
-                cards.forEach(card => {
-                    const text = card.textContent.toLowerCase();
-                    if (text.includes(searchTerm)) {
-                        card.style.display = '';
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
+
+        // MetisMenu initialization - wait for full page load
+        jQuery(document).ready(function($) {
+            // Initialize metismenu
+            if (typeof $.fn.metisMenu === 'function') {
+                $('.metismenu').metisMenu();
+            }
+            
+            // Ensure menu clicks work by preventing event bubbling issues
+            $('.metismenu a').on('click', function(e) {
+                // Don't prevent default for actual links
+                if ($(this).attr('href') && $(this).attr('href') !== 'javascript:;' && $(this).attr('href') !== '#') {
+                    return true;
+                }
             });
-        }
+        });
     </script>
 </body>
 </html>

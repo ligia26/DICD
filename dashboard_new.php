@@ -3,13 +3,115 @@ include 'includes/db.php';
 include 'includes/functions.php';
 
 session_start();
+
+// Auth Check (Recommended, ensure user_id exists before proceeding)
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
 $user_id = $_SESSION['user_id'];
 
+// NOTE: Assuming getUserData and getCompanyName functions retrieve data from your database correctly.
 $user_data = getUserData($conn, $user_id);
 $company = isset($user_data['company']) ? $user_data['company'] : '';
 $company_details = getCompanyName($conn, $company);
 $company_name = isset($company_details['name']) ? $company_details['name'] : '';
 $is_admin = $user_data['admin'];
+
+$company_name_trimmed = trim($company_name);
+$module_status = [
+    // Base keys for all 9 dashboard cards
+    'mautic' => 'N', 'vmds' => 'N', 'tableau' => 'N', 'cleaning' => 'N', 'warmy' => 'N', 'brandexpand' => 'N',
+    'consulting' => 'N', 'tech_hours' => 'N', 'billing' => 'N'     
+];
+
+// Check company and set module status based *strictly* on the spreadsheet data
+switch ($company_name_trimmed) {
+    case 'Data Innovation':
+    case 'DAIN': 
+        $module_status = [
+            'mautic' => 'Y', 'vmds' => 'Y', 'tableau' => 'Y', 'cleaning' => 'Y', 'warmy' => 'Y', 'brandexpand' => 'Y',
+            'consulting' => 'Y', 'tech_hours' => 'Y', 'billing' => 'Y'
+        ];
+        break;
+    case 'Feebbo Digital':
+    case 'FEEB':
+        $module_status = [
+            'mautic' => 'Y', 'vmds' => 'Y', 'tableau' => 'N', 'cleaning' => 'Y', 'warmy' => 'Y', 'brandexpand' => 'Y',
+            'consulting' => 'Y', 'tech_hours' => 'Y', 'billing' => 'Y'
+        ];
+        break;
+    case 'Multigenios de CV':
+    case 'MNST':
+        $module_status = [
+            'mautic' => 'Y', 'vmds' => 'Y', 'tableau' => 'Y', 'cleaning' => 'Y', 'warmy' => 'Y', 'brandexpand' => 'N',
+            'consulting' => 'Y', 'tech_hours' => 'Y', 'billing' => 'Y'
+        ];
+        break;
+    case 'CPC Seguro':
+    case 'CPCS':
+        $module_status = [
+            'mautic' => 'Y', 'vmds' => 'Y', 'tableau' => 'Y', 'cleaning' => 'Y', 'warmy' => 'Y', 'brandexpand' => 'Y',
+            'consulting' => 'Y', 'tech_hours' => 'Y', 'billing' => 'Y'
+        ];
+        break;
+    case 'Cash Cow':
+    case 'CASC': 
+        $module_status = [
+            'mautic' => 'Y', 'vmds' => 'Y', 'tableau' => 'Y', 'cleaning' => 'Y', 'warmy' => 'Y', 'brandexpand' => 'Y',
+            'consulting' => 'Y', 'tech_hours' => 'N', 'billing' => 'Y'
+        ];
+        break;
+    case 'Kum Media':
+    case 'KUMM':
+        $module_status = [
+            'mautic' => 'Y', 'vmds' => 'Y', 'tableau' => 'Y', 'cleaning' => 'N', 'warmy' => 'N', 'brandexpand' => 'Y',
+            'consulting' => 'Y', 'tech_hours' => 'Y', 'billing' => 'Y'
+        ];
+        break;
+    case 'AdviceMe':
+    case 'Advice Me':
+    case 'ADVM': // Consulting is '-' (N), Tech Hours is '-' (N)
+        $module_status = [
+            'mautic' => 'Y', 'vmds' => 'Y', 'tableau' => 'Y', 'cleaning' => 'N', 'warmy' => 'N', 'brandexpand' => 'Y',
+            'consulting' => 'N', 'tech_hours' => 'N', 'billing' => 'Y'
+        ];
+        break;
+    case 'PLNV':
+        $module_status = [
+            'mautic' => 'N', 'vmds' => 'Y', 'tableau' => 'Y', 'cleaning' => 'N', 'warmy' => 'Y', 'brandexpand' => 'N',
+            'consulting' => 'N', 'tech_hours' => 'N', 'billing' => 'Y'
+        ];
+        break;
+    case 'YOKA':
+        $module_status = [
+            'mautic' => 'Y', 'vmds' => 'Y', 'tableau' => 'N', 'cleaning' => 'N', 'warmy' => 'N', 'brandexpand' => 'N',
+            'consulting' => 'N', 'tech_hours' => 'N', 'billing' => 'Y'
+        ];
+        break;
+    case 'NEES':
+        $module_status = [
+            'mautic' => 'N', 'vmds' => 'Y', 'tableau' => 'Y', 'cleaning' => 'N', 'warmy' => 'N', 'brandexpand' => 'N',
+            'consulting' => 'N', 'tech_hours' => 'N', 'billing' => 'Y'
+        ];
+        break;
+    case 'TDEN': 
+        $module_status = [
+            'mautic' => 'N', 'vmds' => 'Y', 'tableau' => 'Y', 'cleaning' => 'Y', 'warmy' => 'Y', 'brandexpand' => 'Y',
+            'consulting' => 'N', 'tech_hours' => 'N', 'billing' => 'Y'
+        ];
+        break;
+    case 'LEGE': 
+        $module_status = [
+            'mautic' => 'N', 'vmds' => 'Y', 'tableau' => 'Y', 'cleaning' => 'N', 'warmy' => 'N', 'brandexpand' => 'Y',
+            'consulting' => 'Y', 'tech_hours' => 'Y', 'billing' => 'Y'
+        ];
+        break;
+    default:
+        // All modules inactive for unknown companies
+        break;
+}
 ?>
 
 <!doctype html>
@@ -17,6 +119,116 @@ $is_admin = $user_data['admin'];
 <head>
     <?php include "includes/head.php"; ?>
     <title>Dashboard - Data Innovation</title>
+    
+    <style>
+        /* Define Blue Colors for consistency */
+        :root {
+            --primary-blue: #0c5a8a; /* Medium Blue */
+            --dark-blue: #094366;    /* Dark Blue/Hover */
+            --focus-shadow: rgba(12, 90, 138, 0.25);
+        }
+
+        /* DASHBOARD CARD STYLES */
+        .dashboard-card {
+            background: white !important;
+            border-radius: 12px !important;
+            padding: 24px !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+            margin-bottom: 24px !important;
+            min-height: 250px !important; 
+            height: auto !important;
+            display: flex !important;
+            flex-direction: column !important;
+            overflow: hidden !important;
+        }
+
+        .card-header-with-action {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            margin-bottom: 20px !important;
+        }
+
+        .dashboard-card-title {
+            font-size: 16px !important;
+            font-weight: 600 !important;
+            color: #2c3e50 !important;
+        }
+
+        .stat-card {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            padding: 12px 0 !important;
+            border-bottom: 1px solid #f0f0f0 !important;
+        }
+
+        .stat-label {
+            font-size: 13px !important;
+            color: #6c757d !important;
+        }
+
+        .stat-value {
+            font-size: 18px !important;
+            font-weight: 600 !important;
+            color: #2c3e50 !important;
+        }
+
+        /* Blue Theme Button Styles */
+        .btn-upgrade {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%) !important;
+            color: white !important;
+            border: none !important;
+            padding: 8px 20px !important;
+            border-radius: 6px !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+        }
+
+        .btn-activate {
+            background: #e9ecef !important;
+            color: #495057 !important;
+            border: none !important;
+            padding: 6px 12px !important;
+            border-radius: 4px !important;
+            font-size: 12px !important;
+        }
+
+        .btn-primary {
+            background: var(--primary-blue) !important;
+            border-color: var(--primary-blue) !important;
+        }
+        .btn-primary:hover {
+            background: var(--dark-blue) !important;
+            border-color: var(--dark-blue) !important;
+        }
+        
+        /* Progress Bar */
+        .progress-bar-custom {
+            width: 100% !important;
+            height: 8px !important;
+            background: #e9ecef !important;
+            border-radius: 4px !important;
+            overflow: hidden !important;
+        }
+
+        .progress-fill {
+            height: 100% !important;
+            background: linear-gradient(90deg, var(--primary-blue) 0%, #1a7bb8 100%) !important;
+            border-radius: 4px !important;
+            transition: width 0.3s ease !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-end !important;
+            padding-right: 8px !important;
+        }
+        
+        .progress-text {
+            font-size: 11px !important;
+            color: #fff !important;
+            font-weight: 600 !important;
+        }
+    </style>
 </head>
 <body>
 <div class="wrapper">
@@ -26,133 +238,240 @@ $is_admin = $user_data['admin'];
     <div class="page-wrapper">
         <div class="page-content">
             
-            <!-- Page Header -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="mb-0">Dashboard</h2>
                 <button class="btn btn-upgrade">Upgrade plan</button>
             </div>
 
-            <!-- Dashboard Cards Row 1 -->
             <div class="row">
-                <!-- Mautic Stack Card -->
                 <div class="col-12 col-xl-4 mb-4">
                     <div class="dashboard-card">
                         <div class="card-header-with-action">
                             <h5 class="dashboard-card-title mb-0">Mautic Stack</h5>
-                            <button class="btn btn-activate btn-sm">Upgrade plan</button>
+                            <?php if ($module_status['mautic'] == 'Y'): ?>
+                                <span class="badge bg-success">Active</span>
+                            <?php else: ?>
+                                <button class="btn btn-activate btn-sm">Activate module</button>
+                            <?php endif; ?>
                         </div>
                         
+                        <?php if ($module_status['mautic'] == 'Y'): ?>
                         <div class="stat-card">
                             <span class="stat-label">Campaigns sent</span>
-                            <span>
-                                <span class="stat-value" id="campaigns-sent">25</span>
-                                <span class="stat-percentage">25%</span>
-                            </span>
+                            <span class="stat-value">25</span>
                         </div>
-                        
                         <div class="stat-card">
                             <span class="stat-label">Click rate</span>
-                            <span>
-                                <span class="stat-value" id="click-rate">6</span>
-                                <span class="stat-percentage">6%</span>
-                            </span>
+                            <span class="stat-value">6%</span>
                         </div>
-                        
-                        <div class="stat-card">
-                            <span class="stat-label">Bounce rate</span>
-                            <span>
-                                <span class="stat-value" id="bounce-rate">3</span>
-                                <span class="stat-percentage">3%</span>
-                            </span>
+                        <?php else: ?>
+                        <div class="text-center py-5">
+                            <p class="text-muted">Module not activated</p>
                         </div>
-
-                        <div class="mt-4">
-                            <!-- Circular Progress -->
-                            <div class="circular-progress">
-                                <svg class="circular-progress-svg" width="160" height="160">
-                                    <circle class="circular-progress-circle" cx="80" cy="80" r="70"></circle>
-                                    <circle class="circular-progress-fill" id="progress-circle" cx="80" cy="80" r="70" 
-                                            stroke-dasharray="440" stroke-dashoffset="44"></circle>
-                                </svg>
-                                <div class="circular-progress-text">
-                                    <div class="circular-progress-number" id="health-score">94</div>
-                                    <div class="circular-progress-label">Corrects</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mt-3 text-center">
-                            <a href="#" class="text-primary">Upgrade plan</a>
-                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
-                <!-- Volume Deliverability Manager Suite Card -->
                 <div class="col-12 col-xl-4 mb-4">
                     <div class="dashboard-card">
                         <div class="card-header-with-action">
                             <h5 class="dashboard-card-title mb-0">Volume Deliverability Manager Suite</h5>
-                            <button class="btn btn-activate btn-sm">Activate module</button>
+                            <?php if ($module_status['vmds'] == 'Y'): ?>
+                                <span class="badge bg-success">Active</span>
+                            <?php else: ?>
+                                <button class="btn btn-activate btn-sm">Activate module</button>
+                            <?php endif; ?>
                         </div>
                         
+                        <?php if ($module_status['vmds'] == 'Y'): ?>
                         <div class="mt-3">
                             <p class="stat-label mb-2">Domain health score</p>
                             <div class="progress-bar-custom">
-                                <div class="progress-fill" id="domain-health-bar" style="width: 75%;">
+                                <div class="progress-fill" style="width: 75%;">
                                     <span class="progress-text">75%</span>
                                 </div>
                             </div>
                         </div>
+                        <?php else: ?>
+                        <div class="text-center py-5">
+                            <p class="text-muted">Module not activated</p>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
-                <!-- BrandExpand Card -->
                 <div class="col-12 col-xl-4 mb-4">
                     <div class="dashboard-card">
                         <div class="card-header-with-action">
                             <h5 class="dashboard-card-title mb-0">BrandExpand</h5>
-                            <button class="btn btn-activate btn-sm">Activate module</button>
+                            <?php if ($module_status['brandexpand'] == 'Y'): ?>
+                                <span class="badge bg-success">Active</span>
+                            <?php else: ?>
+                                <button class="btn btn-activate btn-sm">Activate module</button>
+                            <?php endif; ?>
                         </div>
                         
-                        <div class="mt-3">
-                            <p class="stat-label mb-2">AI content produced</p>
-                            <div class="progress-bar-custom">
-                                <div class="progress-fill" id="ai-content-bar" style="width: 60%;">
-                                    <span class="progress-text">60%</span>
-                                </div>
-                            </div>
+                        <?php if ($module_status['brandexpand'] == 'Y'): ?>
+                        <div class="stat-card">
+                            <span class="stat-label">AI content produced</span>
+                            <span class="stat-value">146</span>
                         </div>
+                        <?php else: ?>
+                        <div class="text-center py-5">
+                            <p class="text-muted">Module not activated</p>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
 
-            <!-- Dashboard Cards Row 2 -->
             <div class="row">
-                <!-- Data Cleaning Hub -->
                 <div class="col-12 col-xl-4 mb-4">
                     <div class="dashboard-card">
-                        <h5 class="dashboard-card-title">Data Cleaning Hub</h5>
-                        <div class="large-number" id="validations-count">832</div>
-                        <p class="number-label">Validation(s) this month</p>
-                        <div class="progress-bar-custom">
-                            <div class="progress-fill" id="validations-bar" style="width: 65%;"></div>
+                        <div class="card-header-with-action">
+                            <h5 class="dashboard-card-title mb-0">Data Cleaning Hub</h5>
+                            <?php if ($module_status['cleaning'] == 'Y'): ?>
+                                <span class="badge bg-success">Active</span>
+                            <?php else: ?>
+                                <button class="btn btn-activate btn-sm">Activate module</button>
+                            <?php endif; ?>
                         </div>
+                        
+                        <?php if ($module_status['cleaning'] == 'Y'): ?>
+                        <div class="stat-card">
+                            <span class="stat-label">Validations this month</span>
+                            <span class="stat-value">832</span>
+                        </div>
+                        <?php else: ?>
+                        <div class="text-center py-4">
+                            <p class="text-muted">Module not activated</p>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
-                <!-- BrandExpand Stats -->
                 <div class="col-12 col-xl-4 mb-4">
                     <div class="dashboard-card">
-                        <h5 class="dashboard-card-title">BrandExpand</h5>
-                        <div class="large-number" id="ai-content-count">146</div>
-                        <p class="number-label">AI content produced</p>
-                        <div class="progress-bar-custom">
-                            <div class="progress-fill" id="ai-content-progress" style="width: 45%;"></div>
+                        <div class="card-header-with-action">
+                            <h5 class="dashboard-card-title mb-0">Warmy</h5>
+                            <?php if ($module_status['warmy'] == 'Y'): ?>
+                                <span class="badge bg-success">Active</span>
+                            <?php else: ?>
+                                <button class="btn btn-activate btn-sm">Activate module</button>
+                            <?php endif; ?>
                         </div>
+                        
+                        <?php if ($module_status['warmy'] == 'Y'): ?>
+                        <div class="stat-card">
+                            <span class="stat-label">Active warmup accounts</span>
+                            <span class="stat-value">12</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Emails sent today</span>
+                            <span class="stat-value">245</span>
+                        </div>
+                        <?php else: ?>
+                        <div class="text-center py-5">
+                            <p class="text-muted">Module not activated</p>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
-                <!-- Invoices & Billing -->
+                <div class="col-12 col-xl-4 mb-4">
+                    <div class="dashboard-card">
+                        <div class="card-header-with-action">
+                            <h5 class="dashboard-card-title mb-0">Tableau Analytics</h5>
+                            <?php if ($module_status['tableau'] == 'Y'): ?>
+                                <span class="badge bg-success">Active</span>
+                            <?php else: ?>
+                                <button class="btn btn-activate btn-sm">Activate module</button>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <?php if ($module_status['tableau'] == 'Y'): ?>
+                        <div class="stat-card">
+                            <span class="stat-label">Total reports</span>
+                            <span class="stat-value">24</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Active dashboards</span>
+                            <span class="stat-value">8</span>
+                        </div>
+                        <?php else: ?>
+                        <div class="text-center py-5">
+                            <p class="text-muted">Module not activated</p>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12 col-xl-4 mb-4">
+                    <div class="dashboard-card">
+                        <div class="card-header-with-action">
+                            <h5 class="dashboard-card-title mb-0">Consulting Services</h5>
+                            <?php if ($module_status['consulting'] == 'Y'): ?>
+                                <span class="badge bg-success">Active</span>
+                            <?php else: ?>
+                                <button class="btn btn-activate btn-sm">Activate module</button>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <?php if ($module_status['consulting'] == 'Y'): ?>
+                        <div class="stat-card">
+                            <span class="stat-label">Hours used this month</span>
+                            <span class="stat-value">12.5 hrs</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Remaining hours</span>
+                            <span class="stat-value">37.5 hrs</span>
+                        </div>
+                        <div class="mt-3">
+                            <button class="btn btn-primary btn-sm w-100">Schedule Session</button>
+                        </div>
+                        <?php else: ?>
+                        <div class="text-center py-5">
+                            <p class="text-muted">Module not activated</p>
+                            <p class="small">Contact sales to add consulting hours</p>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <div class="col-12 col-xl-4 mb-4">
+                    <div class="dashboard-card">
+                        <div class="card-header-with-action">
+                            <h5 class="dashboard-card-title mb-0">Tech Support Hours</h5>
+                            <?php if ($module_status['tech_hours'] == 'Y'): ?>
+                                <span class="badge bg-success">Active</span>
+                            <?php else: ?>
+                                <button class="btn btn-activate btn-sm">Activate module</button>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <?php if ($module_status['tech_hours'] == 'Y'): ?>
+                        <div class="stat-card">
+                            <span class="stat-label">Support hours used</span>
+                            <span class="stat-value">8.0 hrs</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Available hours</span>
+                            <span class="stat-value">42.0 hrs</span>
+                        </div>
+                        <div class="mt-3">
+                            <button class="btn btn-primary btn-sm w-100">Request Support</button>
+                        </div>
+                        <?php else: ?>
+                        <div class="text-center py-5">
+                            <p class="text-muted">Module not activated</p>
+                            <p class="small">Upgrade to premium support</p>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
                 <div class="col-12 col-xl-4 mb-4">
                     <div class="dashboard-card">
                         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -162,83 +481,17 @@ $is_admin = $user_data['admin'];
                         
                         <div class="stat-card mb-3">
                             <span class="stat-label">Current plan</span>
-                            <span class="stat-value" id="current-plan">Pro Plan</span>
+                            <span class="stat-value">Pro Plan</span>
                         </div>
                         
-                        <div class="stat-card">
+                        <div class="stat-card mb-3">
                             <span class="stat-label">Invoices</span>
-                            <span class="stat-value" id="invoice-count">120 nv</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dashboard Cards Row 3 - NEW CARDS -->
-            <div class="row">
-                <!-- Warmy Card -->
-                <div class="col-12 col-xl-6 mb-4">
-                    <div class="dashboard-card">
-                        <div class="card-header-with-action">
-                            <h5 class="dashboard-card-title mb-0">Warmy</h5>
-                            <button class="btn btn-activate btn-sm">View Details</button>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <span class="stat-label">Active warmup accounts</span>
-                            <span class="stat-value" id="warmy-active-accounts">0</span>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <span class="stat-label">Emails sent today</span>
-                            <span class="stat-value" id="warmy-emails-sent">0</span>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <span class="stat-label">Average warmup score</span>
-                            <span class="stat-value" id="warmy-score">0%</span>
+                            <span class="stat-value">120</span>
                         </div>
 
-                        <div class="mt-3">
-                            <p class="stat-label mb-2">Warmup progress</p>
-                            <div class="progress-bar-custom">
-                                <div class="progress-fill" id="warmy-progress-bar" style="width: 0%;">
-                                    <span class="progress-text" id="warmy-progress-text">0%</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tableau Card -->
-                <div class="col-12 col-xl-6 mb-4">
-                    <div class="dashboard-card">
-                        <div class="card-header-with-action">
-                            <h5 class="dashboard-card-title mb-0">Tableau Analytics</h5>
-                            <button class="btn btn-activate btn-sm">Open Dashboard</button>
-                        </div>
-                        
                         <div class="stat-card">
-                            <span class="stat-label">Total reports</span>
-                            <span class="stat-value" id="tableau-reports">0</span>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <span class="stat-label">Active dashboards</span>
-                            <span class="stat-value" id="tableau-dashboards">0</span>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <span class="stat-label">Last updated</span>
-                            <span class="stat-value" id="tableau-last-update">-</span>
-                        </div>
-
-                        <div class="mt-3">
-                            <p class="stat-label mb-2">Data freshness</p>
-                            <div class="progress-bar-custom">
-                                <div class="progress-fill" id="tableau-progress-bar" style="width: 0%;">
-                                    <span class="progress-text" id="tableau-progress-text">0%</span>
-                                </div>
-                            </div>
+                            <span class="stat-label">Next billing date</span>
+                            <span class="stat-value">Dec 15, 2025</span>
                         </div>
                     </div>
                 </div>
@@ -248,122 +501,16 @@ $is_admin = $user_data['admin'];
     </div>
 
     <footer class="page-footer">
-        <p class="mb-0">© 2024 Data Innovation. All right reserved.</p>
+        <p class="mb-0">© 2025 Data Innovation. All rights reserved.</p>
     </footer>
 </div>
 
-<!-- Bootstrap JS -->
 <script src="assets/js/bootstrap.bundle.min.js"></script>
 <script src="assets/js/jquery.min.js"></script>
 <script src="assets/plugins/simplebar/js/simplebar.min.js"></script>
 <script src="assets/plugins/metismenu/js/metisMenu.min.js"></script>
 <script src="assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js"></script>
 <script src="assets/js/app.js"></script>
-
-<!-- Dashboard Dynamic Data Loading -->
-<script>
-$(document).ready(function() {
-    // Load dashboard data
-    loadDashboardData();
-    
-    // Refresh every 30 seconds
-    setInterval(loadDashboardData, 30000);
-});
-
-function loadDashboardData() {
-    $.ajax({
-        url: 'api/dashboard_data.php',
-        method: 'GET',
-        dataType: 'json',
-        success: function(data) {
-            console.log('Dashboard data loaded:', data);
-            
-            // Update Mautic Stack
-            $('#campaigns-sent').text(data.campaigns_sent || 0);
-            $('#click-rate').text(data.click_rate || 0);
-            $('#bounce-rate').text(data.bounce_rate || 0);
-            $('#health-score').text(data.health_score || 0);
-            
-            // Animate circular progress
-            animateCircle(data.health_score || 0);
-            
-            // Update Domain Health (VDMS)
-            $('#domain-health-bar').css('width', (data.domain_health || 0) + '%');
-            $('#domain-health-bar .progress-text').text(Math.round(data.domain_health || 0) + '%');
-            
-            // Update AI Content (BrandExpand - top card)
-            $('#ai-content-bar').css('width', (data.ai_content_progress || 0) + '%');
-            $('#ai-content-bar .progress-text').text(Math.round(data.ai_content_progress || 0) + '%');
-            
-            // Update Validations (Data Cleaning Hub)
-            animateNumber($('#validations-count'), data.validations || 0);
-            $('#validations-bar').css('width', (data.validations_progress || 0) + '%');
-            
-            // Update AI Content Count (BrandExpand - bottom card)
-            animateNumber($('#ai-content-count'), data.ai_content_count || 0);
-            $('#ai-content-progress').css('width', (data.ai_content_bar || 0) + '%');
-            
-            // Update Warmy Metrics
-            if (data.warmy) {
-                $('#warmy-active-accounts').text(data.warmy.active_accounts || 0);
-                $('#warmy-emails-sent').text(formatNumber(data.warmy.emails_sent_today || 0));
-                $('#warmy-score').text((data.warmy.average_score || 0) + '%');
-                
-                const warmupProgress = data.warmy.warmup_progress || 0;
-                $('#warmy-progress-bar').css('width', warmupProgress + '%');
-                $('#warmy-progress-text').text(Math.round(warmupProgress) + '%');
-            }
-            
-            // Update Tableau Metrics
-            if (data.tableau) {
-                $('#tableau-reports').text(data.tableau.total_reports || 0);
-                $('#tableau-dashboards').text(data.tableau.active_dashboards || 0);
-                $('#tableau-last-update').text(data.tableau.last_update || '-');
-                
-                const dataFreshness = data.tableau.data_freshness || 0;
-                $('#tableau-progress-bar').css('width', dataFreshness + '%');
-                $('#tableau-progress-text').text(Math.round(dataFreshness) + '%');
-            }
-            
-            // Update Billing
-            $('#current-plan').text(data.current_plan || 'Free Plan');
-            $('#invoice-count').text((data.invoice_count || 0) + ' nv');
-        },
-        error: function(xhr, status, error) {
-            console.error('Error loading dashboard data:', error);
-        }
-    });
-}
-
-// Animate circular progress
-function animateCircle(percentage) {
-    const circle = $('#progress-circle');
-    const circumference = 440; // 2 * PI * radius (70)
-    const offset = circumference - (percentage / 100) * circumference;
-    
-    circle.css({
-        'stroke-dashoffset': offset,
-        'transition': 'stroke-dashoffset 1s ease'
-    });
-}
-
-// Animate number counting
-function animateNumber(element, target) {
-    const duration = 1000;
-    const start = 0;
-    const increment = (target - start) / (duration / 16);
-    let current = start;
-    
-    const timer = setInterval(function() {
-        current += increment;
-        if (current >= target) {
-            current = target;
-            clearInterval(timer);
-        }
-        element.text(Math.floor(current));
-    }, 16);
-}
-</script>
 
 </body>
 </html>

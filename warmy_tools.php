@@ -15,22 +15,39 @@ session_start();
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <style>
+ <style>
+    /* New Blue Colors */
+    :root {
+        --primary-blue: #0c5a8a;
+        --dark-blue: #094366;
+    }
+
     .page-header{
-      background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+      /* Changed to Blue/Dark Blue Gradient */
+      background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
       color:#fff; padding:2rem; border-radius:10px; margin-bottom:2rem;
     }
     .info-card{
       background: linear-gradient(135deg,#f8f9fa 0%,#eef1ff 100%);
-      border-left: 4px solid #764ba2;
+      /* Changed border-left color */
+      border-left: 4px solid var(--dark-blue);
       padding: 1.5rem; border-radius: 10px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.08);
       transition: .3s ease; margin-bottom: 1.25rem;
     }
     .info-card:hover{ transform: translateY(-3px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
-    .info-card a{ font-weight:600; color:#667eea; text-decoration:none; }
-    .info-card a:hover{ color:#764ba2; text-decoration:underline; }
-  </style>
+    .info-card a{ 
+      font-weight:600; 
+      /* Changed link color */
+      color:var(--primary-blue); 
+      text-decoration:none; 
+    }
+    .info-card a:hover{ 
+      /* Changed link hover color */
+      color:var(--dark-blue); 
+      text-decoration:underline; 
+    }
+</style>
 </head>
 <body>
   <!-- wrapper -->

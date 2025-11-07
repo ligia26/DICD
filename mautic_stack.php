@@ -123,102 +123,120 @@ if ($selected_company && $selected_sending_domain) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        .page-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem;
-            border-radius: 10px;
-            margin-bottom: 2rem;
-        }
-        .filters-section {
-            background: white;
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .mautic-links-list {
-            background: white;
-            border-radius: 10px;
-            padding: 2rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .mautic-link-item {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-left: 4px solid #667eea;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-        .mautic-link-item:hover {
-            transform: translateX(5px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .mautic-link-domain {
-            font-weight: 700;
-            color: #2c3e50;
-            font-size: 1.1rem;
-            margin-bottom: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .mautic-link-url {
-            color: #667eea;
-            font-size: 0.95rem;
-            word-break: break-all;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .mautic-link-url a {
-            color: #667eea;
-            text-decoration: none;
-            transition: all 0.2s ease;
-        }
-        .mautic-link-url a:hover {
-            color: #764ba2;
-            text-decoration: underline;
-        }
-        .form-label {
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 0.5rem;
-        }
-        .form-control:focus, .form-select:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        }
-        .no-selection {
-            text-align: center;
-            padding: 3rem;
-            color: #6c757d;
-        }
-        .no-selection i {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.3;
-        }
-        .info-banner {
-            background: #e7f3ff;
-            border-left: 4px solid #2196F3;
-            padding: 1rem 1.5rem;
-            border-radius: 6px;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        .count-badge {
-            background: #667eea;
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-    </style>
+    /* New Blue Colors */
+    :root {
+        --primary-blue: #0c5a8a;
+        --dark-blue: #094366;
+        --focus-shadow: rgba(12, 90, 138, 0.25);
+    }
+    
+    .page-header {
+        /* Changed to Blue/Dark Blue Gradient */
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+    .filters-section {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .mautic-links-list {
+        background: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .mautic-link-item {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        /* Changed border color */
+        border-left: 4px solid var(--primary-blue);
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    .mautic-link-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .mautic-link-domain {
+        font-weight: 700;
+        color: #2c3e50;
+        font-size: 1.1rem;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .mautic-link-url {
+        /* Changed link color */
+        color: var(--primary-blue);
+        font-size: 0.95rem;
+        word-break: break-all;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .mautic-link-url a {
+        /* Changed link color */
+        color: var(--primary-blue);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    .mautic-link-url a:hover {
+        /* Changed link hover color */
+        color: var(--dark-blue);
+        text-decoration: underline;
+    }
+    .form-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    .form-control:focus, .form-select:focus {
+        /* Changed focus/shadow color */
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 0.2rem var(--focus-shadow);
+    }
+    .no-selection {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+    .no-selection i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.3;
+    }
+    .info-banner {
+        background: #e7f3ff;
+        border-left: 4px solid #2196F3;
+        padding: 1rem 1.5rem;
+        border-radius: 6px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .count-badge {
+        /* Changed badge background color */
+        background: var(--primary-blue);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    /* Ensured text-primary icons use the new main color */
+    .text-primary {
+        color: var(--primary-blue) !important;
+    }
+</style>
 </head>
 
 <body>

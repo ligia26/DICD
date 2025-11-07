@@ -180,6 +180,172 @@ function getSavedData($conn, $domain, $filter_by) {
     }
 }
 
+
+/**
+ * Get module access status for a company - EXACT NAMES
+ * Based on actual company names in your database
+ */
+function getCompanyModuleStatus($company_name) {
+    // Trim and normalize the company name
+    $company_name = trim($company_name);
+    
+    // Hardcoded module access based on exact company names
+    $module_access = [
+        'Data Innovation' => [
+            'mautic' => 'Y',
+            'vmds' => 'Y',
+            'tableau' => 'Y',
+            'cleaning' => 'Y',
+            'warmy' => 'Y',
+            'brandexpand' => 'Y',
+            'consulting' => 'Y',
+            'tech_hours' => 'Y',
+            'billing' => 'Y'
+        ],
+        'Feebbo Digital' => [
+            'mautic' => 'Y',
+            'vmds' => 'Y',
+            'tableau' => 'N',
+            'cleaning' => 'Y',
+            'warmy' => 'Y',
+            'brandexpand' => 'Y',
+            'consulting' => 'Y',
+            'tech_hours' => 'Y',
+            'billing' => 'Y'
+        ],
+        'Multigenios de CV' => [  // MNST
+            'mautic' => 'Y',
+            'vmds' => 'Y',
+            'tableau' => 'Y',
+            'cleaning' => 'Y',
+            'warmy' => 'Y',
+            'brandexpand' => 'Y',
+            'consulting' => 'Y',
+            'tech_hours' => 'Y',
+            'billing' => 'Y'
+        ],
+        'CPC Seguro' => [  // CPCS
+            'mautic' => 'Y',
+            'vmds' => 'Y',
+            'tableau' => 'Y',
+            'cleaning' => 'Y',
+            'warmy' => 'Y',
+            'brandexpand' => 'Y',
+            'consulting' => 'N',
+            'tech_hours' => 'Y',
+            'billing' => 'Y'
+        ],
+        'Cash Cow' => [  // CASC
+            'mautic' => 'Y',
+            'vmds' => 'Y',
+            'tableau' => 'Y',
+            'cleaning' => 'Y',
+            'warmy' => 'Y',
+            'brandexpand' => 'Y',
+            'consulting' => 'Y',
+            'tech_hours' => 'Y',
+            'billing' => 'Y'
+        ],
+        'Kum Media' => [  // KUMM
+            'mautic' => 'Y',
+            'vmds' => 'Y',
+            'tableau' => 'Y',
+            'cleaning' => 'N',
+            'warmy' => 'N',
+            'brandexpand' => 'Y',
+            'consulting' => 'N',
+            'tech_hours' => 'Y',
+            'billing' => 'Y'
+        ],
+        'AdviceMe' => [  // ADVM
+            'mautic' => 'Y',
+            'vmds' => 'Y',
+            'tableau' => 'Y',
+            'cleaning' => 'N',
+            'warmy' => 'N',
+            'brandexpand' => 'Y',
+            'consulting' => 'N',
+            'tech_hours' => 'Y',
+            'billing' => 'Y'
+        ],
+        'Advice Me' => [  // ADVM (alternative spelling)
+            'mautic' => 'Y',
+            'vmds' => 'Y',
+            'tableau' => 'Y',
+            'cleaning' => 'N',
+            'warmy' => 'N',
+            'brandexpand' => 'Y',
+            'consulting' => 'N',
+            'tech_hours' => 'Y',
+            'billing' => 'Y'
+        ],
+        'Producciones Lo Nunca Visto' => [  // PLNV
+            'mautic' => 'N',
+            'vmds' => 'Y',
+            'tableau' => 'Y',
+            'cleaning' => 'Y',
+            'warmy' => 'Y',
+            'brandexpand' => 'Y',
+            'consulting' => 'N',
+            'tech_hours' => 'Y',
+            'billing' => 'Y'
+        ],
+       
+        'TradeDoubler' => [  // TDEN? (need confirmation)
+            'mautic' => 'Y',
+            'vmds' => 'Y',
+            'tableau' => 'Y',
+            'cleaning' => 'Y',
+            'warmy' => 'Y',
+            'brandexpand' => 'Y',
+            'consulting' => 'Y',
+            'tech_hours' => 'Y',
+            'billing' => 'Y'
+        ],
+        'iCommers' => [  // LEGE? (need confirmation)
+            'mautic' => 'N',
+            'vmds' => 'Y',
+            'tableau' => 'Y',
+            'cleaning' => 'Y',
+            'warmy' => 'N',
+            'brandexpand' => 'Y',
+            'consulting' => 'Y',
+            'tech_hours' => 'N',
+            'billing' => 'Y'
+        ],
+        'Moon Shot' => [  // Need spreadsheet mapping
+            'mautic' => 'Y',
+            'vmds' => 'Y',
+            'tableau' => 'Y',
+            'cleaning' => 'Y',
+            'warmy' => 'Y',
+            'brandexpand' => 'Y',
+            'consulting' => 'Y',
+            'tech_hours' => 'Y',
+            'billing' => 'Y'
+        ]
+    ];
+    
+    // Return the module access for the company
+    if (isset($module_access[$company_name])) {
+        return $module_access[$company_name];
+    }
+    
+    // Default: all modules inactive if company not in list
+    return [
+        'mautic' => 'N',
+        'vmds' => 'N',
+        'tableau' => 'N',
+        'cleaning' => 'N',
+        'warmy' => 'N',
+        'brandexpand' => 'N',
+        'consulting' => 'N',
+        'tech_hours' => 'N',
+        'billing' => 'N'
+    ];
+}
+    
+
 /**
  * Fetches saved config data, fully filtered by all user selections.
  *

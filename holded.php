@@ -53,15 +53,48 @@ if ($selected_company && isset($COMPANY_LINKS[$selected_company])) {
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
-    .page-header { background: linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:#fff; padding:2rem; border-radius:10px; margin-bottom:2rem; }
-    .filters-section { background:#fff; border-radius:10px; padding:1.5rem; margin-bottom:2rem; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
-    .link-card { background:#fff; border-radius:10px; padding:1rem 1.25rem; margin-bottom:1rem; border-left:4px solid #667eea; box-shadow:0 2px 6px rgba(0,0,0,.06); }
-    .link-card:hover { transform: translateX(4px); transition:.2s ease; box-shadow:0 4px 12px rgba(0,0,0,.08); }
-    .company { font-weight:700; color:#2c3e50; }
-    .url a { color:#667eea; text-decoration:none; }
-    .url a:hover { color:#764ba2; text-decoration:underline; }
-    .count-badge { background:#667eea; color:#fff; padding:.25rem .75rem; border-radius:20px; font-size:.85rem; font-weight:600; }
-  </style>
+    /* Define Blue Colors for consistency */
+    :root {
+        --primary-blue: #0c5a8a; /* Medium Blue */
+        --dark-blue: #094366;    /* Dark Blue/Hover */
+    }
+
+    .page-header { 
+        /* Changed gradient background */
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%); 
+        color:#fff; padding:2rem; border-radius:10px; margin-bottom:2rem; 
+    }
+    .filters-section { 
+        background:#fff; border-radius:10px; padding:1.5rem; margin-bottom:2rem; box-shadow:0 2px 8px rgba(0,0,0,0.1); 
+    }
+    .link-card { 
+        background:#fff; border-radius:10px; padding:1rem 1.25rem; margin-bottom:1rem; 
+        /* Changed border-left color */
+        border-left:4px solid var(--primary-blue); 
+        box-shadow:0 2px 6px rgba(0,0,0,.06); 
+    }
+    .link-card:hover { 
+        transform: translateX(4px); transition:.2s ease; box-shadow:0 4px 12px rgba(0,0,0,.08); 
+    }
+    .company { 
+        font-weight:700; color:#2c3e50; 
+    }
+    .url a { 
+        /* Changed link color */
+        color:var(--primary-blue); 
+        text-decoration:none; 
+    }
+    .url a:hover { 
+        /* Changed link hover color */
+        color:var(--dark-blue); 
+        text-decoration:underline; 
+    }
+    .count-badge { 
+        /* Changed badge background color */
+        background:var(--primary-blue); 
+        color:#fff; padding:.25rem .75rem; border-radius:20px; font-size:.85rem; font-weight:600; 
+    }
+</style>
 </head>
 <body>
   <!-- wrapper -->

@@ -1,4 +1,4 @@
-/* SIDEBAR */
+/* SIDEBAR - EXPANDED STATE (234px) */
 .sidebar-wrapper {
     background: linear-gradient(180deg, #0c5a8a 0%, #094366 100%) !important;
     width: 234px !important;
@@ -7,51 +7,50 @@
     top: 0 !important;
     height: 100vh !important;
     z-index: 1000 !important;
+    transition: width 0.3s ease !important;
 }
-
 
 .sidebar-header {
     background: #094366 !important;
     padding: 20px !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
     width: 234px !important;
-    box-sizing: border-box !important;
+    transition: all 0.3s ease !important;
 }
 
 .sidebar-header .logo-text {
-    width: 100% !important;
-    display: block !important;
+    display: flex !important;
+    align-items: center !important;
 }
 
-.sidebar-header img {
+.sidebar-header .logo-icon {
     max-width: 140px !important;
     max-height: 40px !important;
     filter: brightness(0) invert(1) !important;
-    display: block !important;
+    transition: all 0.3s ease !important;
 }
+
+.sidebar-header .toggle-icon {
+    color: #fff !important;
+    cursor: pointer !important;
+    font-size: 22px !important;
+}
+
 .sidebar-wrapper .metismenu {
     margin: 0 !important;
-    padding: 0 !important;
-    list-style: none !important;
+    padding: 10px !important;
 }
-.sidebar-wrapper .metismenu a {
-    padding: 14px 20px 14px 20px !important; /* 14px top/bottom, 20px left/right */
-}
-
-
-
-
 
 .sidebar-wrapper .metismenu a {
     color: rgba(255, 255, 255, 0.9) !important;
     padding: 14px 20px !important;
+    border-radius: 8px !important;
 }
 
 .sidebar-wrapper .metismenu a:hover {
     background: rgba(255, 255, 255, 0.1) !important;
 }
 
-/* SUBMENUS - HIDDEN BY DEFAULT */
 .sidebar-wrapper .metismenu ul {
     display: none !important;
     background: rgba(0, 0, 0, 0.25) !important;
@@ -61,28 +60,95 @@
     display: block !important;
 }
 
-.sidebar-wrapper .metismenu ul li a {
-    padding-left: 55px !important;
-    font-size: 13px !important;
+/* COLLAPSED STATE (70px) */
+.wrapper.toggled .sidebar-wrapper {
+    width: 70px !important;
 }
 
-/* SIDEBAR FOOTER */
-.sidebar-footer {
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
+.wrapper.toggled .sidebar-header {
+    width: 70px !important;
+    padding: 15px 10px !important;
+    justify-content: center !important;
+}
+
+.wrapper.toggled .sidebar-header .logo-icon {
+    max-width: 40px !important;
+    max-height: 40px !important;
+}
+
+.wrapper.toggled .sidebar-header .toggle-icon {
+    display: none !important;
+}
+
+.wrapper.toggled .sidebar-wrapper .metismenu a {
+    justify-content: center !important;
+    padding: 14px 10px !important;
+}
+
+.wrapper.toggled .sidebar-wrapper .metismenu .menu-title {
+    display: none !important;
+}
+
+.wrapper.toggled .sidebar-wrapper .metismenu .has-arrow:after {
+    display: none !important;
+}
+
+.wrapper.toggled .sidebar-wrapper .metismenu ul {
+    display: none !important;
+}
+
+/* HOVER EXPAND WHEN COLLAPSED */
+.wrapper.toggled.sidebar-hovered .sidebar-wrapper {
     width: 234px !important;
-    padding: 15px !important;
-    background: rgba(0, 0, 0, 0.2) !important;
-    color: rgba(255, 255, 255, 0.7) !important;
-    text-align: center !important;
 }
 
-/* PAGE WRAPPER - BLUE BORDER */
+.wrapper.toggled.sidebar-hovered .sidebar-header {
+    width: 234px !important;
+    padding: 20px !important;
+}
+
+.wrapper.toggled.sidebar-hovered .sidebar-header .logo-icon {
+    max-width: 140px !important;
+    max-height: 40px !important;
+}
+
+.wrapper.toggled.sidebar-hovered .sidebar-wrapper .metismenu a {
+    justify-content: flex-start !important;
+    padding: 14px 20px !important;
+}
+
+.wrapper.toggled.sidebar-hovered .sidebar-wrapper .metismenu .menu-title {
+    display: block !important;
+}
+
+/* ADJUST MAIN CONTENT */
 .page-wrapper {
     margin-left: 234px !important;
     border: 3px solid #0c5a8a !important;
     border-left: none !important;
+    transition: margin-left 0.3s ease !important;
+}
+
+.wrapper.toggled .page-wrapper {
+    margin-left: 70px !important;
+}
+
+.topbar {
+    left: 234px !important;
+    transition: left 0.3s ease !important;
+}
+
+.wrapper.toggled .topbar {
+    left: 70px !important;
+}
+
+.page-footer {
+    left: 234px !important;
+    transition: left 0.3s ease !important;
+}
+
+.wrapper.toggled .page-footer {
+    left: 70px !important;
 }
 
 /* DASHBOARD CARDS */
@@ -92,9 +158,114 @@
     padding: 24px !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
     margin-bottom: 24px !important;
+    min-height: 420px !important;
+    max-height: 420px !important;
+    height: 420px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
 }
 
-/* CIRCULAR PROGRESS */
+.dashboard-card > *:last-child {
+    margin-top: auto !important;
+}
+
+.card-header-with-action {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 20px !important;
+}
+
+.dashboard-card-title {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: #2c3e50 !important;
+}
+
+.stat-card {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 12px 0 !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+}
+
+.stat-label {
+    font-size: 13px !important;
+    color: #6c757d !important;
+}
+
+.stat-value {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: #2c3e50 !important;
+}
+
+.stat-percentage {
+    font-size: 12px !important;
+    color: #6c757d !important;
+    margin-left: 8px !important;
+}
+
+.large-number {
+    font-size: 48px !important;
+    font-weight: 700 !important;
+    color: #0c5a8a !important;
+    line-height: 1 !important;
+}
+
+.number-label {
+    font-size: 14px !important;
+    color: #6c757d !important;
+    margin-top: 8px !important;
+    margin-bottom: 16px !important;
+}
+
+.progress-bar-custom {
+    width: 100% !important;
+    height: 8px !important;
+    background: #e9ecef !important;
+    border-radius: 4px !important;
+    overflow: hidden !important;
+}
+
+.progress-fill {
+    height: 100% !important;
+    background: linear-gradient(90deg, #0c5a8a 0%, #1a7bb8 100%) !important;
+    border-radius: 4px !important;
+    transition: width 0.3s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    padding-right: 8px !important;
+}
+
+.progress-text {
+    font-size: 11px !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+}
+
+.btn-upgrade {
+    background: linear-gradient(135deg, #0c5a8a 0%, #094366 100%) !important;
+    color: white !important;
+    border: none !important;
+    padding: 8px 20px !important;
+    border-radius: 6px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+}
+
+.btn-activate {
+    background: #e9ecef !important;
+    color: #495057 !important;
+    border: none !important;
+    padding: 6px 12px !important;
+    border-radius: 4px !important;
+    font-size: 12px !important;
+}
+
 .circular-progress {
     width: 160px !important;
     height: 160px !important;
@@ -131,72 +302,213 @@
 }
 
 .circular-progress-number {
-    font-size: 48px !important;
+    font-size: 36px !important;
     font-weight: 700 !important;
     color: #0c5a8a !important;
 }
 
 .circular-progress-label {
-    font-size: 14px !important;
-    color: #666 !important;
-}
-
-/* PROGRESS BARS */
-/* PROGRESS BARS - FIX PERCENTAGE POSITION */
-/* PROGRESS BARS - FIX PERCENTAGE POSITION */
-.progress-bar-custom {
-    height: 8px !important;
-    background: #e8e8e8 !important;
-    border-radius: 10px !important;
-    margin-top: 35px !important;
-    width: 100% !important;
-    position: relative !important;
-}
-
-.progress-fill {
-    height: 8px !important;
-    background: linear-gradient(90deg, #0c5a8a 0%, #1a7ab5 100%) !important;
-    border-radius: 10px !important;
-    transition: width 1s !important;
-}
-
-.progress-text {
-    position: absolute !important;
-    top: -25px !important;
-    right: 0 !important;
     font-size: 12px !important;
-    font-weight: 600 !important;
-    color: #0c5a8a !important;
+    color: #6c757d !important;
+    text-align: center !important;
+}
+/* Default State (Expanded) */
+.sidebar-header .logo-full {
+    display: block !important; /* Show the full logo */
+}
+
+.sidebar-header .logo-dark {
+    display: none !important; /* Hide the dark logo */
+}
+
+/* --- COLLAPSED STATE (.wrapper.toggled) --- */
+.wrapper.toggled .sidebar-header .logo-full {
+    display: none !important; /* HIDE the full logo when toggled */
+}
+
+.wrapper.toggled .sidebar-header .logo-dark {
+    display: block !important; /* SHOW the dark logo when toggled */
+    /* Ensure the dark logo uses the smaller size defined in the CSS block below */
+}
+
+/* The existing CSS block for the collapsed state already handles the size: */
+/*
+.wrapper.toggled .sidebar-header .logo-icon {
+    max-width: 40px !important;
+    max-height: 40px !important;
+}
+*/
+
+/* --- HOVER EXPAND WHEN COLLAPSED (.wrapper.toggled.sidebar-hovered) --- */
+/* When hovering over the collapsed sidebar, we want the full logo back. */
+.wrapper.toggled.sidebar-hovered .sidebar-header .logo-full {
+    display: block !important; /* SHOW the full logo on hover */
+}
+
+.wrapper.toggled.sidebar-hovered .sidebar-header .logo-dark {
+    display: none !important; /* HIDE the dark logo on hover */
+}
+/* Fix for Sub-menu Clicking when Collapsed (Wrapper is .toggled) */
+.wrapper.toggled .sidebar-wrapper .metismenu > li:hover > ul {
+    /* Ensures the sub-menu becomes visible */
+    display: block !important; 
+    
+    /* Position the sub-menu outside of the 70px collapsed area */
+    position: absolute !important;
+    top: 0 !important;
+    left: 70px !important; /* Start right after the 70px sidebar */
+    
+    /* Set a reasonable width for the sub-menu */
+    width: 200px !important; 
+    
+    /* Ensure it overlaps other content */
+    z-index: 1050 !important; 
+    
+    /* Match the background of the submenu */
+    background: rgba(0, 0, 0, 0.25) !important;
+    
+    /* Add padding to the list */
+    padding: 5px 0 !important;
+    
+    /* Smooth transition (optional, but nice) */
+    transition: none !important; 
+}
+
+/* Ensure the sub-menu's list items have padding for easy clicking */
+.wrapper.toggled .sidebar-wrapper .metismenu > li:hover > ul li a {
+    padding: 10px 15px !important;
+}
+
+/* Fix for the sidebar-scroll container hiding overflow */
+.wrapper.toggled .sidebar-scroll {
+    overflow: visible !important;
+}
+/* FIX FOR PAGE OVERLAP: When the sidebar is collapsed (.toggled) but we are hovering over it (.sidebar-hovered), 
+   the page must shift to the fully expanded width (234px). */
+.wrapper.toggled.sidebar-hovered .page-wrapper {
+    margin-left: 234px !important;
+}
+
+/* FIX FOR TOPBAR OVERLAP: Same logic for the topbar */
+.wrapper.toggled.sidebar-hovered .topbar {
+    left: 234px !important;
+}
+
+/* FIX FOR FOOTER OVERLAP: Same logic for the footer */
+.wrapper.toggled.sidebar-hovered .page-footer {
+    left: 234px !important;
+}
+/* 1. Ensure the sidebar scroll container doesn't cut off the floating sub-menu */
+.wrapper.toggled .sidebar-scroll {
+    overflow: visible !important;
+}
+
+/* 2. Style and position the sub-menu when the main menu item is hovered in the collapsed state */
+.wrapper.toggled .sidebar-wrapper .metismenu > li:hover > ul {
+    display: block !important; 
+    
+    /* Position the sub-menu right next to the 70px sidebar */
+    position: absolute !important;
+    top: 0 !important;
+    left: 70px !important; 
+    
+    width: 200px !important; 
+    z-index: 1000 !important; 
+    
+    /* Maintain the sub-menu background color */
+    background: rgba(0, 0, 0, 0.25) !important;
+    padding: 5px 0 !important;
+    
+    /* Ensure the sub-menu starts flush with the main item (no gap from parent LI padding) */
+    margin-left: 0 !important; 
+}
+
+/* 3. Ensure the sub-menu links are easily clickable */
+.wrapper.toggled .sidebar-wrapper .metismenu > li:hover > ul li a {
+    padding: 10px 15px !important;
+}
+.sidebar-wrapper {
+    /* ... existing styles ... */
+    z-index: 1000 !important; /* Keep this high */
+    transition: width 0.3s ease !important;
+}
+/* 1. Crucial: Allow the floating menu to escape the sidebar's scroll container */
+.wrapper.toggled .sidebar-scroll {
+    overflow: visible !important;
+}
+
+/* 2. Style the floating sub-menu when the main item is hovered in the collapsed state */
+.wrapper.toggled .sidebar-wrapper .metismenu > li:hover > ul {
+    display: block !important; 
+    
+    /* Absolute positioning for the floating menu */
+    position: absolute !important;
+    top: 0 !important;
+    left: 70px !important; /* Positions it right next to the 70px collapsed sidebar */
+    
+    width: 200px !important; 
+    
+    /* THIS IS KEY: Make sure the sub-menu is on top of the main content */
+    z-index: 1060 !important; 
+    
+    /* Matching sidebar background */
+    background: rgba(0, 0, 0, 0.25) !important;
+    padding: 5px 0 !important;
+    
+    /* Ensure no margin/gap prevents immediate hover transition */
+    margin-left: 0 !important; 
+    
+    /* Ensure rounded corners if desired, to make it look distinct */
+    border-radius: 0 8px 8px 0 !important;
+}
+
+/* 3. Ensure the active item within the submenu is styled correctly */
+.wrapper.toggled .sidebar-wrapper .metismenu > li:hover > ul li a {
+    padding: 10px 15px !important;
+    white-space: nowrap !important; /* Prevents long names from wrapping and messing up the width */
+}
+/* 1. Crucial: Allow the floating menu to escape the sidebar's scroll container */
+.wrapper.toggled .sidebar-scroll {
+    overflow: visible !important;
+}
+
+/* 2. Style the floating sub-menu when the main item is hovered in the collapsed state */
+.wrapper.toggled .sidebar-wrapper .metismenu > li:hover > ul {
+    display: block !important; 
+    
+    /* Absolute positioning for the floating menu */
+    position: absolute !important;
+    top: 0 !important;
+    left: 70px !important; /* Positions it right next to the 70px collapsed sidebar */
+    
+    width: 200px !important; 
+    
+    /* THIS IS THE KEY FIX: Ensure the floating sub-menu is on top */
+    z-index: 1080 !important; 
+    
+    /* Use a solid, opaque background to completely cover the page content behind it */
+    background: #094366 !important; /* Using a solid color from your sidebar-header */
+    
+    padding: 5px 0 !important;
+    
+    /* Ensure no margin/gap prevents immediate hover transition */
+    margin-left: 0 !important; 
+    
+    /* Optional: box shadow to make it look like it's floating */
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.4);
+    
+    /* Ensure the sub-menu links are easily clickable */
+    list-style: none !important; 
+}
+
+/* 3. Ensure the active item within the submenu is styled correctly */
+.wrapper.toggled .sidebar-wrapper .metismenu > li:hover > ul li a {
+    padding: 10px 15px !important;
     white-space: nowrap !important;
+    background: transparent !important; /* Reset background */
 }
 
-/* BUTTONS */
-.btn-upgrade, .btn-activate {
-    background: #0c5a8a !important;
-    color: white !important;
-    border: none !important;
-    border-radius: 6px !important;
-    padding: 8px 20px !important;
-}
-
-.btn-upgrade:hover, .btn-activate:hover {
-    background: #094366 !important;
-}
-
-/* STATS */
-.large-number {
-    font-size: 48px !important;
-    font-weight: 700 !important;
-    color: #1a1a1a !important;
-}
-
-.stat-label {
-    font-size: 14px !important;
-    color: #666 !important;
-}
-
-.stat-value {
-    font-size: 18px !important;
-    font-weight: 600 !important;
-    color: #1a1a1a !important;
+/* 4. Ensure links in the floating menu are highlighted on hover */
+.wrapper.toggled .sidebar-wrapper .metismenu > li:hover > ul li a:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
 }
