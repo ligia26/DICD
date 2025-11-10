@@ -31,7 +31,7 @@ if (!isset($_SESSION['user_id'])) {
 	<link href="assets/css/app.css" rel="stylesheet"> 
 	<link href="assets/css/icons.css" rel="stylesheet">
 	<!-- REMOVED: dark-theme.css and semi-dark.css - they conflict -->
-	<!-- <link rel="stylesheet" href="assets/css/dark-theme.css"/> -->
+	
 	<!-- <link rel="stylesheet" href="assets/css/semi-dark.css"/> -->
 	<link rel="stylesheet" href="assets/css/header-colors.css"/>
 	<title>Data Innovation -Clients Area</title>
@@ -49,5 +49,8 @@ if (!isset($_SESSION['user_id'])) {
 
 
 <link href="assets/css/custom-dashboard.css" rel="stylesheet">
+
+<link rel="stylesheet" href="assets/css/dark-theme.css"/> 
+<link rel="stylesheet" href="assets/css/dark-mode-custom.css"/>
     
 </head>

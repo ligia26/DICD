@@ -850,3 +850,316 @@ html.dark-theme .product-discount {
 		border-left: 0 solid #ededed
 	}
 }
+/* ============================================
+   DARK MODE - CUSTOM DASHBOARD CARDS
+   Add these styles to the END of assets/css/dark-theme.css
+   ============================================ */
+
+/* Dashboard Cards */
+html.dark-theme .dashboard-card {
+    background-color: #12181a !important;
+    border: 1px solid rgb(255 255 255 / 12%) !important;
+    color: #e4e5e6 !important;
+    box-shadow: 0 0.1rem 0.7rem rgb(0 0 0 / 20%) !important;
+}
+
+html.dark-theme .dashboard-card-title {
+    color: #e4e5e6 !important;
+}
+
+html.dark-theme .stat-label {
+    color: #9ea4aa !important;
+}
+
+html.dark-theme .stat-value {
+    color: #ffffff !important;
+}
+
+html.dark-theme .stat-percentage {
+    color: #9ea4aa !important;
+}
+
+html.dark-theme .number-label {
+    color: #9ea4aa !important;
+}
+
+html.dark-theme .large-number {
+    color: #ffffff !important;
+}
+
+/* Stat Cards */
+html.dark-theme .stat-card {
+    border-bottom: 1px solid rgb(255 255 255 / 12%) !important;
+}
+
+/* Progress Bars */
+html.dark-theme .progress-bar-custom {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark-theme .progress-fill {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+html.dark-theme .progress-text {
+    color: #ffffff !important;
+}
+
+/* Circular Progress */
+html.dark-theme .circular-progress-circle {
+    stroke: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark-theme .circular-progress-fill {
+    stroke: #667eea !important;
+}
+
+html.dark-theme .circular-progress-number {
+    color: #ffffff !important;
+}
+
+html.dark-theme .circular-progress-label {
+    color: #9ea4aa !important;
+}
+
+/* Buttons */
+html.dark-theme .btn-upgrade {
+    background-color: #0c5a8a !important;
+    color: #ffffff !important;
+    border-color: #0c5a8a !important;
+}
+
+html.dark-theme .btn-upgrade:hover {
+    background-color: #094870 !important;
+    border-color: #094870 !important;
+}
+
+html.dark-theme .btn-activate {
+    background-color: #0c5a8a !important;
+    color: #ffffff !important;
+    border-color: #0c5a8a !important;
+}
+
+html.dark-theme .btn-activate:hover {
+    background-color: #094870 !important;
+    border-color: #094870 !important;
+}
+
+html.dark-theme .btn-primary {
+    background-color: #0c5a8a !important;
+    border-color: #0c5a8a !important;
+}
+
+html.dark-theme .btn-primary:hover {
+    background-color: #094870 !important;
+    border-color: #094870 !important;
+}
+
+/* Badge */
+html.dark-theme .badge.bg-success {
+    background-color: #28a745 !important;
+    color: #ffffff !important;
+}
+
+/* Card Header with Action */
+html.dark-theme .card-header-with-action {
+    color: #e4e5e6 !important;
+}
+
+/* Text Muted */
+html.dark-theme .text-muted {
+    color: #9ea4aa !important;
+}
+
+/* Page Content Background */
+html.dark-theme .page-content {
+    background-color: #070d0e !important;
+}
+
+/* Holded/Invoice Cards */
+html.dark-theme .invoice-card,
+html.dark-theme .holded-card {
+    background-color: #12181a !important;
+    border: 1px solid rgb(255 255 255 / 12%) !important;
+    color: #e4e5e6 !important;
+}
+
+html.dark-theme .invoice-header,
+html.dark-theme .holded-header {
+    background-color: #12181a !important;
+    border-bottom: 1px solid rgb(255 255 255 / 12%) !important;
+    color: #e4e5e6 !important;
+}
+
+html.dark-theme .invoice-item,
+html.dark-theme .holded-item {
+    border-bottom: 1px solid rgb(255 255 255 / 12%) !important;
+}
+
+html.dark-theme .invoice-total,
+html.dark-theme .holded-total {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border-top: 1px solid rgb(255 255 255 / 12%) !important;
+}
+
+/* List Groups */
+html.dark-theme .list-group-item {
+    background-color: #12181a !important;
+    border: 1px solid rgb(255 255 255 / 12%) !important;
+    color: #e4e5e6 !important;
+}
+
+html.dark-theme .list-group-item:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Modal */
+html.dark-theme .modal-content {
+    background-color: #12181a !important;
+    border: 1px solid rgb(255 255 255 / 12%) !important;
+}
+
+html.dark-theme .modal-header {
+    background-color: #12181a !important;
+    border-bottom: 1px solid rgb(255 255 255 / 12%) !important;
+    color: #e4e5e6 !important;
+}
+
+html.dark-theme .modal-body {
+    background-color: #12181a !important;
+    color: #e4e5e6 !important;
+}
+
+html.dark-theme .modal-footer {
+    background-color: #12181a !important;
+    border-top: 1px solid rgb(255 255 255 / 12%) !important;
+}
+
+html.dark-theme .modal-title {
+    color: #e4e5e6 !important;
+}
+
+/* Input Groups */
+html.dark-theme .input-group-text {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgb(255 255 255 / 31%) !important;
+    color: #e4e5e6 !important;
+}
+
+/* Breadcrumb */
+html.dark-theme .breadcrumb {
+    background-color: transparent !important;
+}
+
+html.dark-theme .breadcrumb-item {
+    color: #9ea4aa !important;
+}
+
+html.dark-theme .breadcrumb-item.active {
+    color: #e4e5e6 !important;
+}
+
+html.dark-theme .breadcrumb-item + .breadcrumb-item::before {
+    color: #9ea4aa !important;
+}
+
+/* Alerts */
+html.dark-theme .alert-success {
+    background-color: rgba(40, 167, 69, 0.2) !important;
+    border-color: rgba(40, 167, 69, 0.3) !important;
+    color: #5cb85c !important;
+}
+
+html.dark-theme .alert-danger {
+    background-color: rgba(220, 53, 69, 0.2) !important;
+    border-color: rgba(220, 53, 69, 0.3) !important;
+    color: #f86c6b !important;
+}
+
+html.dark-theme .alert-warning {
+    background-color: rgba(255, 193, 7, 0.2) !important;
+    border-color: rgba(255, 193, 7, 0.3) !important;
+    color: #ffc107 !important;
+}
+
+html.dark-theme .alert-info {
+    background-color: rgba(23, 162, 184, 0.2) !important;
+    border-color: rgba(23, 162, 184, 0.3) !important;
+    color: #63c2de !important;
+}
+
+/* Pagination */
+html.dark-theme .pagination .page-link {
+    background-color: #12181a !important;
+    border-color: rgb(255 255 255 / 12%) !important;
+    color: #e4e5e6 !important;
+}
+
+html.dark-theme .pagination .page-link:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgb(255 255 255 / 20%) !important;
+}
+
+html.dark-theme .pagination .page-item.active .page-link {
+    background-color: #0c5a8a !important;
+    border-color: #0c5a8a !important;
+}
+
+/* Tabs */
+html.dark-theme .nav-tabs {
+    border-bottom: 1px solid rgb(255 255 255 / 14%) !important;
+}
+
+html.dark-theme .nav-tabs .nav-link {
+    color: #9ea4aa !important;
+    border: 1px solid transparent !important;
+}
+
+html.dark-theme .nav-tabs .nav-link:hover {
+    border-color: rgb(255 255 255 / 10%) !important;
+    color: #e4e5e6 !important;
+}
+
+html.dark-theme .nav-tabs .nav-link.active {
+    color: #ffffff !important;
+    background-color: #12181a !important;
+    border-color: rgb(255 255 255 / 14%) rgb(255 255 255 / 14%) transparent !important;
+}
+
+/* Custom Scrollbar */
+html.dark-theme ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+html.dark-theme ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+html.dark-theme ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+}
+
+html.dark-theme ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Links */
+html.dark-theme a {
+    color: #667eea !important;
+}
+
+html.dark-theme a:hover {
+    color: #764ba2 !important;
+}
+
+html.dark-theme .text-primary {
+    color: #667eea !important;
+}
+
+/* HR */
+html.dark-theme hr {
+    border-color: rgb(255 255 255 / 12%) !important;
+    opacity: 1 !important;
+}
