@@ -45,36 +45,6 @@ $countries = getCountries($conn);
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
-    <script>
-    // RUN THIS FIRST - BEFORE ANYTHING ELSE
-    (function() {
-        const dark = (localStorage.getItem('darkMode') === 'enabled');
-        const html = document.documentElement;
-        html.classList.remove('dark-theme', 'light-theme');
-        html.classList.add(dark ? 'dark-theme' : 'light-theme');
-        html.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
-    })();
-    
-    function applyThemeFromStorage() {
-        const dark = (localStorage.getItem('darkMode') === 'enabled');
-        const html = document.documentElement;
-        html.classList.remove('dark-theme', 'light-theme');
-        html.classList.add(dark ? 'dark-theme' : 'light-theme');
-        html.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
-        document.querySelectorAll('.dark-mode-icon i').forEach(icon => {
-            icon.classList.remove('bx-sun', 'bx-moon');
-            icon.classList.add(dark ? 'bx-sun' : 'bx-moon');
-        });
-    }
-
-    window.toggleTheme = function() {
-        const currentMode = localStorage.getItem('darkMode');
-        const newMode = (currentMode === 'enabled') ? 'disabled' : 'enabled';
-        localStorage.setItem('darkMode', newMode);
-        applyThemeFromStorage(); 
-    };
-    </script>
     <title>VDMS Suite</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -263,18 +233,6 @@ $countries = getCountries($conn);
 </div>
 
 <script src="assets/js/jquery.min.js"></script>
-<script src="assets/js/app.js"></script>
-<script>
-console.log('Scripts loaded!');
-$(document).on('click', '.expand-btn', function(e) {
-    e.preventDefault();
-    var $details = $(this).closest('.rule-card').find('.rule-details');
-    $details.toggleClass('collapsed');
-    $(this).html($details.hasClass('collapsed') ? '<i class="fas fa-chevron-down"></i> Details' : '<i class="fas fa-chevron-up"></i> Hide');
-});
-</script>
-
-<script src="assets/js/jquery.min.js"></script>
 <script src="assets/plugins/simplebar/js/simplebar.min.js"></script>
 <script src="assets/plugins/metismenu/js/metisMenu.min.js"></script>
 <script src="assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js"></script>
@@ -282,60 +240,28 @@ $(document).on('click', '.expand-btn', function(e) {
 <script src="assets/js/app.js"></script>
 
 <script>
-// Wait for EVERYTHING to load, not just DOM
-jQuery(window).on('load', function($) {
+// Use jQuery click handler instead of vanilla JS
+jQuery(document).ready(function($) {
     
-    // Also re-run after a short delay to catch late-loading elements
-    setTimeout(function() {
+    // Toggle details using jQuery delegation (works for all elements, even dynamically loaded)
+    $(document).on('click', '.expand-btn', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
         
-        // Toggle details using jQuery delegation
-        $(document).off('click', '.expand-btn'); // Remove any existing handlers
-        $(document).on('click', '.expand-btn', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            var $card = $(this).closest('.rule-card');
-            var $details = $card.find('.rule-details');
-            
-            if ($details.hasClass('collapsed')) {
-                $details.removeClass('collapsed').css('display', 'grid');
-                $(this).html('<i class="fas fa-chevron-up"></i> Hide');
-            } else {
-                $details.addClass('collapsed').css('display', 'none');
-                $(this).html('<i class="fas fa-chevron-down"></i> Details');
-            }
-        });
+        var $card = $(this).closest('.rule-card');
+        var $details = $card.find('.rule-details');
         
-        console.log('Toggle handlers attached to ' + $('.expand-btn').length + ' buttons');
-        
-    }, 500); // Wait 500ms after page load
-});
-</script>
-<script>
-// FORCE re-apply theme after everything loads
-window.addEventListener('load', function() {
-    applyThemeFromStorage();
-    console.log('Theme re-applied after full load');
-});
-
-// And for the toggle buttons - use event delegation that works no matter what
-$(document).on('click', '.expand-btn', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
+        if ($details.hasClass('collapsed')) {
+            $details.removeClass('collapsed').css('display', 'grid');
+            $(this).html('<i class="fas fa-chevron-up"></i> Hide');
+        } else {
+            $details.addClass('collapsed').css('display', 'none');
+            $(this).html('<i class="fas fa-chevron-down"></i> Details');
+        }
+    });
     
-    var $card = $(this).closest('.rule-card');
-    var $details = $card.find('.rule-details');
-    
-    if ($details.hasClass('collapsed')) {
-        $details.removeClass('collapsed').css('display', 'grid');
-        $(this).html('<i class="fas fa-chevron-up"></i> Hide');
-    } else {
-        $details.addClass('collapsed').css('display', 'none');
-        $(this).html('<i class="fas fa-chevron-down"></i> Details');
-    }
+    console.log('Toggle handlers attached to ' + $('.expand-btn').length + ' buttons');
 });
-
-console.log('All handlers attached');
 </script>
 </body>
 </html>
