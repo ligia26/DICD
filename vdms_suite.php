@@ -4,544 +4,338 @@ include 'includes/db.php';
 include 'includes/functions.php';
 global $conn;
 
-$log_file = '/var/www/clients.datainnovation.io/html/reading.log';
-file_put_contents($log_file, "Request received\n", FILE_APPEND);
-
-
-// --- Auth Check (from your new file) ---
-if (!isset($_SESSION['user_id'])) {
-    die("No user_id in session. Please log in first.");
-}
+if (!isset($_SESSION['user_id'])) die("No user_id in session.");
 $user_id = $_SESSION['user_id']; 
 
-$selected_domain      = $_POST['domain']      ?? null; if ($selected_domain      === '') $selected_domain = null;
-$selected_user_domain = $_POST['user_domain'] ?? null; if ($selected_user_domain === '') $selected_user_domain = null;
-$selected_company     = $_POST['company']     ?? null; if ($selected_company     === '') $selected_company = null;
+$selected_domain = $_POST['domain'] ?? ''; 
+$selected_user_domain = $_POST['user_domain'] ?? ''; 
+$selected_company = $_POST['company'] ?? ''; 
 
-// --- Get User/Company Info (from your new file) ---
-$sql = "SELECT u.admin, u.company AS company_id, c.name AS company_name
-        FROM users u
-        LEFT JOIN companies c ON u.company = c.id
-        WHERE u.id = ?";
+$sql = "SELECT u.admin, u.company AS company_id, c.name AS company_name FROM users u LEFT JOIN companies c ON u.company = c.id WHERE u.id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param('i', $user_id);
 $stmt->execute();
 $user_data = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
-if (!$user_data) {
-    die("Fatal Error: Could not find data for logged-in user.");
-}
-
 $is_admin = $user_data['admin'];
 $user_company_id = $user_data['company_id']; 
-$company = $user_data['company_name'];   
 
-
-$last_update_result = getLastUpdatess($conn, $selected_domain);
-$domain_result = getSendingDomains_2($conn, $user_company_id, $is_admin, $selected_company);
+$domain_result = getSendingDomains_2($conn, $user_company_id, $is_admin, $selected_company); 
 $user_domain_result = getUserDomains($conn);
-
 $category_result = getCategories($conn);
 $all_categories = [];
 if ($category_result && $category_result->num_rows > 0) {
-    while ($cat_row = $category_result->fetch_assoc()) {
-        $all_categories[] = $cat_row['cat_class']; 
-    }
+    while ($cat_row = $category_result->fetch_assoc()) $all_categories[] = $cat_row['cat_class']; 
 }
-$dsli_options = [
-    'Auto', '15', '30', '45', '60', '90', '120', '150',
-    '180', '365', '1000', '120' 
-];
-$saved_data_result = getSavedData_2($conn, $selected_domain, 'sending_domain', $selected_company, $selected_user_domain);
 
-function getRelatedUserDomains($conn, $sendingDomain) {
-    $sql = "SELECT ud.name
-              FROM sending_domain_user_domain sud
-              JOIN sending_domains  sd ON sud.sending_domain_id = sd.id
-              JOIN user_domains     ud ON sud.user_domain_id    = ud.id
-             WHERE sd.domain = ? AND ud.status = 1";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param('s', $sendingDomain);
-    $stmt->execute();
-    $res = $stmt->get_result();
-    $names = [];
-    while ($row = $res->fetch_assoc()) { $names[] = $row['name']; }
-    $stmt->close();
-    return $names;
-}
+$dsli_options = ['Auto', '15', '30', '45', '60', '90', '120', '150', '180', '365', '1000'];
+$saved_data_result = getSavedData_2($conn, $selected_domain, 'sending_domain', $selected_company, $selected_user_domain);
 
 function getCountries($conn) {
     $sql = "SELECT id, name, short FROM countries WHERE 1";
     $result = $conn->query($sql);
     $countries = [];
-    while ($row = $result->fetch_assoc()) {
-        $countries[$row['id']] = $row;
-    }
+    while ($row = $result->fetch_assoc()) $countries[$row['id']] = $row;
     return $countries;
 }
-
 $countries = getCountries($conn);
-
-function getLastUpdatess($conn, $domain) {
-    if (empty($domain)) {
-        $sql = "SELECT conf_changes_log.updated_at, users.name AS name
-               FROM conf_changes_log
-                LEFT JOIN users ON conf_changes_log.user_id = users.id
-                ORDER BY updated_at DESC LIMIT 1";
-        $stmt = $conn->prepare($sql);
-    } else {
-        $sql = "SELECT conf_changes_log.updated_at, users.name AS name
-                FROM conf_changes_log
-                LEFT JOIN users ON conf_changes_log.user_id = users.id
-                WHERE conf_changes_log.sending_domain = ?
-                ORDER BY updated_at DESC LIMIT 1";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("s", $domain);
-    }
-    
-    if ($stmt) {
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $stmt->close();
-        return $result;
-    } else {
-        error_log("SQL error: " . $conn->error);
-        return false;
-    }
-}
 ?>
-
 <!doctype html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDMS Suite - Rules Configuration</title>
+
+    <script>
+    // RUN THIS FIRST - BEFORE ANYTHING ELSE
+    (function() {
+        const dark = (localStorage.getItem('darkMode') === 'enabled');
+        const html = document.documentElement;
+        html.classList.remove('dark-theme', 'light-theme');
+        html.classList.add(dark ? 'dark-theme' : 'light-theme');
+        html.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
+    })();
     
-    <!-- Bootstrap 5 CSS -->
+    function applyThemeFromStorage() {
+        const dark = (localStorage.getItem('darkMode') === 'enabled');
+        const html = document.documentElement;
+        html.classList.remove('dark-theme', 'light-theme');
+        html.classList.add(dark ? 'dark-theme' : 'light-theme');
+        html.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
+        document.querySelectorAll('.dark-mode-icon i').forEach(icon => {
+            icon.classList.remove('bx-sun', 'bx-moon');
+            icon.classList.add(dark ? 'bx-sun' : 'bx-moon');
+        });
+    }
+
+    window.toggleTheme = function() {
+        const currentMode = localStorage.getItem('darkMode');
+        const newMode = (currentMode === 'enabled') ? 'disabled' : 'enabled';
+        localStorage.setItem('darkMode', newMode);
+        applyThemeFromStorage(); 
+    };
+    </script>
+    <title>VDMS Suite</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- VDMS Suite Custom Styles -->
     <link rel="stylesheet" href="assets/css/vdms_suite.css">
+    <link rel="stylesheet" href="assets/css/dark-theme.css"/>
     <style>
-    /* Hide dashboard duplicate - target only the direct first child of #menu */
-    #menu > li:first-child {
+    #menu > li:first-child { display: none !important; }
+    .rule-details.collapsed { display: none !important; }
+    .expand-btn { 
+        cursor: pointer !important; 
+        pointer-events: auto !important;
+        z-index: 10 !important;
+        position: relative !important;
+    }
+    /* FIX: Ensure nothing blocks the button */
+    .rule-header {
+        pointer-events: auto !important;
+        position: relative !important;
+    }
+    .rule-card {
+        pointer-events: auto !important;
+    }
+    /* FIX: Prevent overlays from blocking clicks */
+    .overlay, .offcanvas-backdrop, .sidebar-overlay {
+        pointer-events: none !important;
         display: none !important;
     }
-
-    /* Make sure details are hidden when collapsed */
-    .rule-details.collapsed { 
-        display: none !important; 
+    /* FIX: Dark mode shouldn't affect clickability */
+    html.dark-theme .expand-btn,
+    html.light-theme .expand-btn,
+    html[data-bs-theme="dark"] .expand-btn,
+    html[data-bs-theme="light"] .expand-btn {
+        pointer-events: auto !important;
+        z-index: 10 !important;
     }
     </style>
+    <style>
+#menu > li:first-child { display: none !important; }
+.rule-details.collapsed { 
+    display: none !important; 
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+.rule-details:not(.collapsed) {
+    display: grid !important;
+    visibility: visible !important;
+    height: auto !important;
+}
+.expand-btn { 
+    cursor: pointer !important; 
+    pointer-events: auto !important;
+    z-index: 100 !important;
+    position: relative !important;
+    background: transparent !important;
+    border: 1px solid #ccc !important;
+}
+.rule-header > * {
+    pointer-events: auto !important;
+}
+</style>
 </head>
 <body>
-    <!--wrapper-->
-    <div class="wrapper">
-        <!--sidebar wrapper -->
-        <?php include "includes/side_menu.php"; ?>
-        <!--end sidebar wrapper -->
-        <?php include "includes/header.php"; ?>
-        <!--end header -->
-        
-        <!--start page wrapper -->
-        <div class="page-wrapper">
-            <div class="page-content">
-                
-                <!-- Page Header -->
-                <div class="page-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h2 class="mb-1"><i class="fas fa-cogs"></i> VDMS Suite - Rules Configuration</h2>
-                            <p class="mb-0 opacity-75">Manage sending domains, user domains, and campaign rules</p>
+<div class="wrapper">
+    <?php include "includes/side_menu.php"; include "includes/header.php"; ?> 
+    <div class="page-wrapper">
+        <div class="page-content">
+            <div class="page-header">
+                <h2><i class="fas fa-cogs"></i> VDMS Suite - Rules Configuration</h2>
+            </div>
+            
+            <div class="filters-section">
+                <form method="post">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold"><i class="fas fa-building"></i> Company</label>
+                            <select class="form-select" name="company" onchange="this.form.submit()">
+                            <?php
+                            $sql_companies = "SELECT id, name FROM companies";
+                            if ($is_admin != 1) $sql_companies .= " WHERE id = ?";
+                            $sql_companies .= " ORDER BY name";
+                            $stmt_companies = $conn->prepare($sql_companies);
+                            if ($is_admin != 1) $stmt_companies->bind_param('i', $user_company_id);
+                            $stmt_companies->execute();
+                            $companies_result = $stmt_companies->get_result();
+                            echo "<option value=''>All Companies</option>";
+                            while ($comp = $companies_result->fetch_assoc()) {
+                                $cname = htmlspecialchars($comp['name']);
+                                $sel = ($selected_company == $cname) ? "selected" : "";
+                                echo "<option value='$cname' $sel>$cname</option>";
+                            }
+                            $stmt_companies->close();
+                            ?>
+                            </select>
                         </div>
-                        <button class="btn btn-light" type="button">
-                            <i class="fas fa-plus"></i> Add New Rule
-                        </button>
+                        
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold"><i class="fas fa-globe"></i> Domain</label>
+                            <select class="form-select" name="domain" onchange="this.form.submit()">
+                            <?php
+                            echo '<option value="">All Domains</option>';
+                            if ($domain_result && $domain_result->num_rows > 0) {
+                                while ($dr = $domain_result->fetch_assoc()) {
+                                    $vd = htmlspecialchars($dr['domain'] ?? '');
+                                    $lc = htmlspecialchars($dr['company_name'] ?? '');
+                                    $sel = ($selected_domain === $vd) ? 'selected' : '';
+                                    echo "<option value='$vd' $sel>$vd ($lc)</option>";
+                                }
+                            }
+                            ?>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold"><i class="fas fa-at"></i> User Domain</label>
+                            <select class="form-select" name="user_domain" onchange="this.form.submit()">
+                            <?php
+                            echo '<option value="">All User Domains</option>';
+                            if ($user_domain_result && $user_domain_result->num_rows > 0) {
+                                while ($udr = $user_domain_result->fetch_assoc()) {
+                                    $n = $udr['name'] ?? '';
+                                    $vn = htmlspecialchars($n);
+                                    $sel = ($selected_user_domain === $n) ? 'selected' : '';
+                                    echo "<option value='$vn' $sel>$vn</option>";
+                                }
+                            }
+                            ?>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div id="rulesList">
+            <?php
+            if ($saved_data_result && count($saved_data_result) > 0) {
+                foreach ($saved_data_result as $sr) {
+                    $sd = $sr['sending_domain'];
+                    $ud = $sr['user_domain'];
+                    $cs = isset($countries[$sr['country_id']]) ? $countries[$sr['country_id']]['short'] : 'N/A';
+            ?>
+                <div class="rule-card">
+                    <div class="rule-header">
+                        <div class="header-col col-sending-domain"><span class="col-label">Domain</span><div class="domain-badge"><?=htmlspecialchars($sd)?></div></div>
+                        <div class="header-col col-user-domain"><span class="col-label">User Domain</span><div class="user-domain-badge"><?=htmlspecialchars($ud)?></div></div>
+                        <div class="header-col col-country"><span class="col-label">Country</span><div class="country-badge">🌍 <?=htmlspecialchars($cs)?></div></div>
+                        <div class="header-col col-sendables"><span class="col-label">Sendables</span><div class="col-value"><?=number_format($sr['sendables'])?></div></div>
+                        <div class="header-col col-actives"><span class="col-label">ACT/SEND</span><div class="col-value"><?=number_format($sr['actives'])?></div></div>
+                        <div class="header-col col-sent-tm"><span class="col-label">Sent TM</span><div class="col-value"><?=number_format($sr['sent_amount'])?></div></div>
+                        <div class="header-col col-clicks-tm"><span class="col-label">Clicks</span><div class="col-value"><?=number_format($sr['clickers'])?></div></div>
+                        <div class="header-col col-small"><span class="col-label">OR</span><div class="col-value"><?=number_format($sr['open_rate'], 1)?>%</div></div>
+                        <div class="header-col col-small"><span class="col-label">CR</span><div class="col-value"><?=number_format($sr['click_rate'], 1)?>%</div></div>
+                        <div class="header-col col-small"><span class="col-label">BR</span><div class="col-value"><?=number_format($sr['bounce_rate'], 2)?>%</div></div>
+                        <div class="header-col col-dsli"><span class="col-label">DSLI</span>
+                            <select class="form-select form-select-sm" name="dsli[<?=$sr['id']?>]">
+                                <?php foreach ($dsli_options as $opt): ?>
+                                <option value="<?=$opt?>" <?=($sr['dsli'] == $opt) ? 'selected' : ''?>><?=$opt?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="header-col col-status"><span class="col-label">Status</span>
+                            <select class="form-select form-select-sm" name="status[<?=$sr['id']?>]">
+                                <?php foreach ($all_categories as $cat): ?>
+                                <option value="<?=htmlspecialchars($cat)?>" <?=(($sr['category'] ?? 'Auto') == $cat) ? 'selected' : ''?>><?=htmlspecialchars($cat)?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <button class="expand-btn" type="button"><i class="fas fa-chevron-down"></i> Details</button>
+                    </div>
+                    <div class="rule-details collapsed">
+                        <div class="metric-box"><span class="metric-label">Clickers</span><span class="metric-value"><?=number_format($sr['clickers'])?></span></div>
+                        <div class="metric-box"><span class="metric-label">Openers</span><span class="metric-value"><?=number_format($sr['openers'])?></span></div>
+                        <div class="metric-box"><span class="metric-label">Reactivated</span><span class="metric-value"><?=number_format($sr['reactivated'])?></span></div>
+                        <div class="metric-box"><span class="metric-label">Preactivated</span><span class="metric-value"><?=number_format($sr['preactivated'])?></span></div>
+                        <div class="metric-box"><span class="metric-label">Halfslept</span><span class="metric-value"><?=number_format($sr['halfslept'])?></span></div>
+                        <div class="metric-box"><span class="metric-label">Awaken</span><span class="metric-value"><?=number_format($sr['awaken'])?></span></div>
+                        <div class="metric-box"><span class="metric-label">Whitelist</span><span class="metric-value"><?=number_format($sr['whitelist'])?></span></div>
+                        <div class="metric-box"><span class="metric-label">New</span><span class="metric-value"><?=number_format($sr['new'])?></span></div>
+                        <div class="metric-box"><span class="metric-label">Slept</span><span class="metric-value"><?=number_format($sr['slept'])?></span></div>
                     </div>
                 </div>
-                
-                <!-- Last Update Banner -->
-                <?php
-                if ($last_update_result && $last_update_result->num_rows > 0) {
-                    $last_update = $last_update_result->fetch_assoc();
-                    echo '<div class="last-update-banner">';
-                    echo '<i class="fas fa-clock"></i> <strong>Last changes:</strong> ' . htmlspecialchars($last_update['updated_at']) . ' by ' . htmlspecialchars($last_update['name']);
-                    echo '</div>';
-                }
-                ?>
-                
-                <!-- Filters Section -->
-                <div class="filters-section">
-                    <form method="post" id="domain-filter-form">
-                        <div class="row g-3 align-items-end">
-                            <div class="col-md-3">
-                                <label class="form-label fw-bold mb-1">
-                                    <i class="fas fa-building"></i> Filter by Company
-                                </label>
-                                <select class="form-select form-select-sm" name="company" onchange="resetDomainAndSubmit(this)">
-                                <?php
-                                // --- New SQL query to get companies ---
-                                $sql_companies = "SELECT id, name FROM companies";
-                                
-                                // If user is NOT admin, only show their own company
-                                if ($is_admin != 1) {
-                                    $sql_companies .= " WHERE id = ?";
-                                }
-                                $sql_companies .= " ORDER BY name";
-
-                                $stmt_companies = $conn->prepare($sql_companies);
-                                
-                                if ($is_admin != 1) {
-                                    // Bind the user's company ID to the query
-                                    $stmt_companies->bind_param('i', $user_company_id);
-                                }
-                                
-                                $stmt_companies->execute();
-                                $companies_result = $stmt_companies->get_result();
-                                $stmt_companies->close();
-                                // --- End of new code ---
-
-                                echo "<option value=''>All Companies</option>";
-                                while ($comp = $companies_result->fetch_assoc()) {
-                                    $cname = $comp['name'];
-                                    $selectedC = ($selected_company == $cname) ? "selected" : "";
-                                    echo "<option value='$cname' $selectedC>$cname</option>";
-                                }
-                                ?>
-                            </select>
-                            </div>
-                            
-                           <div class="col-md-3">
-                            <label class="form-label fw-bold mb-1">
-                                <i class="fas fa-globe"></i> Filter by Domain
-                            </label>
-                            <select class="form-select form-select-sm" name="domain" id="domainSelect" onchange="this.form.submit()">
-                                <?php
-                                echo '<option value="">All Sending Domains</option>';
-
-                                if ($domain_result instanceof mysqli_result && $domain_result->num_rows > 0) {
-                                    $domain_result->data_seek(0);
-
-                                    while ($domain_row = $domain_result->fetch_assoc()) {
-                                        $valDomain = htmlspecialchars($domain_row['domain'] ?? '', ENT_QUOTES, 'UTF-8');
-                                        $labelCompany = htmlspecialchars($domain_row['company_name'] ?? '', ENT_QUOTES, 'UTF-8');
-
-                                        $isSelected = ($selected_domain !== null && $selected_domain === ($domain_row['domain'] ?? '')) ? 'selected' : '';
-
-                                        echo "<option value=\"{$valDomain}\" {$isSelected}>{$valDomain}" .
-                                            ($labelCompany !== '' ? " ({$labelCompany})" : "") .
-                                            "</option>";
-                                    }
-                                }
-                                ?>
-                            </select>
-                            </div>
-
-                            
-                            <div class="col-md-3">
-                            <label class="form-label fw-bold mb-1">
-                                <i class="fas fa-at"></i> Filter by User Domain
-                            </label>
-                            <select class="form-select form-select-sm" name="user_domain" onchange="this.form.submit()">
-                                <?php
-                                echo '<option value="">All User Domains</option>';
-
-                                if ($user_domain_result instanceof mysqli_result && $user_domain_result->num_rows > 0) {
-                                    $user_domain_result->data_seek(0);
-
-                                    while ($user_domain_row = $user_domain_result->fetch_assoc()) {
-                                        $name = $user_domain_row['name'] ?? '';
-                                        $valName = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
-                                        $isSelected = ($selected_user_domain !== null && $selected_user_domain === $name) ? 'selected' : '';
-
-                                        echo "<option value=\"{$valName}\" {$isSelected}>{$valName}</option>";
-                                    }
-                                }
-                                ?>
-                            </select>
-                            </div>
-
-                            <div class="col-md-3">
-                                <div class="position-relative">
-                                    <i class="fas fa-search position-absolute" style="left: 0.75rem; top: 50%; transform: translateY(-50%); color: #6c757d;"></i>
-                                    <input type="text" class="form-control form-control-sm ps-5" placeholder="Search..." id="searchInput">
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                
-                <!-- Rules List -->
-                <div id="rulesList">
-                    <?php
-                    if ($saved_data_result !== false && count($saved_data_result) > 0) {
-                        foreach ($saved_data_result as $saved_row) {
-                            $sending_domain = $saved_row['sending_domain'];
-                            $user_domain_name = $saved_row['user_domain'];
-                            
-                            $country_short = isset($countries[$saved_row['country_id']]) ? $countries[$saved_row['country_id']]['short'] : 'N/A';
-                            
-                            $health_score = 75;
-                            $health_class = 'health-good';
-                            if ($health_score >= 90) $health_class = 'health-excellent';
-                            elseif ($health_score >= 70) $health_class = 'health-good';
-                            elseif ($health_score >= 50) $health_class = 'health-warning';
-                            else $health_class = 'health-danger';
-                    ?>
-                    
-                        <div class="rule-card" data-domain="<?php echo htmlspecialchars($sending_domain); ?>" data-user-domain="<?php echo htmlspecialchars($user_domain_name); ?>">
-                            <div class="rule-header">
-                                <input type="checkbox" class="rule-checkbox" onchange="toggleSelection(this)">
-                                
-                                <div class="header-col col-sending-domain">
-                                    <span class="col-label">Sending Domain</span>
-                                    <div class="domain-badge"><?php echo htmlspecialchars($sending_domain); ?></div>
-                                </div>
-                                
-                                <div class="header-col col-user-domain">
-                                    <span class="col-label">User Domain</span>
-                                    <div class="user-domain-badge"><?php echo htmlspecialchars($user_domain_name); ?></div>
-                                </div>
-                                
-                                <div class="header-col col-country">
-                                    <span class="col-label">Country</span>
-                                    <div class="country-badge">🌍 <?php echo htmlspecialchars($country_short); ?></div>
-                                </div>
-                                
-                                <div class="header-col col-sendables">
-                                    <span class="col-label">Sendables</span>
-                                    <div class="col-value"><?php echo number_format($saved_row['sendables']); ?></div>
-                                </div>
-                                
-                                <div class="header-col col-actives">
-                                    <span class="col-label">ACT/SEND</span>
-                                    <div class="col-value"><?php echo number_format($saved_row['actives']); ?></div>
-                                </div>
-                                
-                                <div class="header-col col-sent-tm">
-                                    <span class="col-label">Sent TM</span>
-                                    <div class="col-value"><?php echo number_format($saved_row['sent_amount']); ?></div>
-                                </div>
-                                
-                                <div class="header-col col-clicks-tm">
-                                    <span class="col-label">Clicks TM</span>
-                                    <div class="col-value"><?php echo number_format($saved_row['clickers']); ?></div>
-                                </div>
-                                
-                                <div class="header-col col-health">
-                                    <span class="col-label">Health</span>
-                                    <div class="health-score <?php echo $health_class; ?>"><?php echo $health_score; ?></div>
-                                </div>
-                                
-                                <div class="header-col col-small">
-                                    <span class="col-label">OR</span>
-                                    <div class="col-value"><?php echo number_format($saved_row['open_rate'], 1); ?>%</div>
-                                </div>
-                                
-                                <div class="header-col col-small">
-                                    <span class="col-label">CR</span>
-                                    <div class="col-value"><?php echo number_format($saved_row['click_rate'], 1); ?>%</div>
-                                </div>
-                                
-                                <div class="header-col col-small">
-                                    <span class="col-label">BR</span>
-                                    <div class="col-value <?php echo ($saved_row['bounce_rate'] > 2) ? 'percentage-negative' : 'percentage-neutral'; ?>">
-                                        <?php echo number_format($saved_row['bounce_rate'], 2); ?>%
-                                    </div>
-                                </div>
-                                
-                                <div class="header-col col-small">
-                                    <span class="col-label">ACT/SENT</span>
-                                    <div class="col-value">
-                                        <?php 
-                                        $act_sent_ratio = ($saved_row['sent_amount'] > 0) ? 
-                                            ($saved_row['actives'] / $saved_row['sent_amount'] * 100) : 0;
-                                        echo number_format($act_sent_ratio, 2); 
-                                        ?>%
-                                    </div>
-                                </div>
-                                
-                                <div class="header-col col-small">
-                                    <span class="col-label">ACT GAINS</span>
-                                    <div class="col-value percentage-negative">-2.1%</div>
-                                </div>
-                                
-                                <div class="header-col col-small">
-                                    <span class="col-label">SCHEDULED</span>
-                                    <div class="col-value">3.5%</div>
-                                </div>
-                                
-                                <div class="header-col col-dsli">
-                                    <span class="col-label">DSLI</span>
-                                    <?php
-                                        $current_dsli = $saved_row['dsli']; 
-                                        $rule_id = $saved_row['id'];
-                                    ?>
-                                    <select class="form-select form-select-sm" name="dsli[<?php echo $rule_id; ?>]">
-                                        <?php foreach ($dsli_options as $option): ?>
-                                            <option value="<?php echo $option; ?>" <?php echo ($current_dsli == $option) ? 'selected' : ''; ?>>
-                                                <?php echo $option; ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                                                                
-                                <div class="header-col col-status">
-                                    <span class="col-label">Status</span>
-                                    <?php
-                                        $current_rule = $saved_row['category'] ?? 'Auto'; 
-                                        $rule_id = $saved_row['id'];
-                                    ?>
-                                    <select class="form-select form-select-sm" name="status[<?php echo $rule_id; ?>]">
-                                        <?php foreach ($all_categories as $category_name): ?>
-                                            <option value="<?php echo htmlspecialchars($category_name); ?>" <?php echo ($current_rule == $category_name) ? 'selected' : ''; ?>>
-                                                <?php echo htmlspecialchars($category_name); ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                                                                
-                                <button class="expand-btn" type="button" onclick="toggleDetails(this); return false;">
-                                    <i class="fas fa-chevron-down"></i> Details
-                                </button>
-                            </div>
-                            
-                            <div class="rule-details collapsed">
-                                <div class="metric-box"><span class="metric-label">Clickers</span><span class="metric-value"><?php echo number_format($saved_row['clickers']); ?></span></div>
-                                <div class="metric-box"><span class="metric-label">Openers</span><span class="metric-value"><?php echo number_format($saved_row['openers']); ?></span></div>
-                                <div class="metric-box"><span class="metric-label">Reactivated</span><span class="metric-value"><?php echo number_format($saved_row['reactivated']); ?></span></div>
-                                <div class="metric-box"><span class="metric-label">Preactivated</span><span class="metric-value"><?php echo number_format($saved_row['preactivated']); ?></span></div>
-                                <div class="metric-box"><span class="metric-label">Halfslept</span><span class="metric-value"><?php echo number_format($saved_row['halfslept']); ?></span></div>
-                                <div class="metric-box"><span class="metric-label">Awaken</span><span class="metric-value"><?php echo number_format($saved_row['awaken']); ?></span></div>
-                                <div class="metric-box"><span class="metric-label">Whitelist</span><span class="metric-value"><?php echo number_format($saved_row['whitelist']); ?></span></div>
-                                <div class="metric-box"><span class="metric-label">Precached</span><span class="metric-value"><?php echo number_format($saved_row['precached']); ?></span></div>
-                                <div class="metric-box"><span class="metric-label">Zeroclicks</span><span class="metric-value"><?php echo number_format($saved_row['zeroclicks']); ?></span></div>
-                                <div class="metric-box"><span class="metric-label">New</span><span class="metric-value"><?php echo number_format($saved_row['new']); ?></span></div>
-                                <div class="metric-box"><span class="metric-label">AOS</span><span class="metric-value"><?php echo number_format($saved_row['aos']); ?></span></div>
-                                <div class="metric-box"><span class="metric-label">Slept</span><span class="metric-value"><?php echo number_format($saved_row['slept']); ?></span></div>
-                                <div class="metric-box"><span class="metric-label">Keepalive</span><span class="metric-value"><?php echo number_format($saved_row['keepalive']); ?></span></div>
-                                <div class="metric-box"><span class="metric-label">Stranger</span><span class="metric-value"><?php echo number_format($saved_row['stranger']); ?></span></div>
-                                <div class="metric-box"><span class="metric-label">New Inactive</span><span class="metric-value"><?php echo number_format($saved_row['new_inactive']); ?></span></div>
-                                <div class="metric-box"><span class="metric-label">Total Inactive</span><span class="metric-value"><?php echo number_format($saved_row['total_inactive']); ?></span></div>
-                                </div>
-                        </div>
-
-                    <?php
-                        } // End foreach loop
-                        
-                    } else {
-                        echo '<div class="alert alert-info">No rules found. Please adjust your filters.</div>';
-                    }
-                    ?>
-                </div>
-                
+            <?php }} else { echo '<div class="alert alert-info">No rules found</div>'; } ?>
             </div>
         </div>
-        <!--end page wrapper -->
-        
-        <!--start overlay-->
-        <div class="overlay toggle-icon"></div>
-        <!--end overlay-->
-        
-        <!--Start Back To Top Button-->
-        <a href="javaScript:;" class="back-to-top"><i class='bx bxs-up-arrow-alt'></i></a>
-        <!--End Back To Top Button-->
-        
-        <footer class="page-footer">
-            <p class="mb-0">Copyright © 2024. All right reserved.</p>
-        </footer>
     </div>
-    <!--end wrapper-->
+</div>
 
-    <!-- Scripts -->
-    <script src="assets/js/jquery.min.js"></script>
-    <script src="assets/plugins/simplebar/js/simplebar.min.js"></script>
-    <script src="assets/plugins/metismenu/js/metisMenu.min.js"></script>
-    <script src="assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/js/app.js"></script>
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+console.log('Scripts loaded!');
+$(document).on('click', '.expand-btn', function(e) {
+    e.preventDefault();
+    var $details = $(this).closest('.rule-card').find('.rule-details');
+    $details.toggleClass('collapsed');
+    $(this).html($details.hasClass('collapsed') ? '<i class="fas fa-chevron-down"></i> Details' : '<i class="fas fa-chevron-up"></i> Hide');
+});
+</script>
+
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/plugins/simplebar/js/simplebar.min.js"></script>
+<script src="assets/plugins/metismenu/js/metisMenu.min.js"></script>
+<script src="assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/app.js"></script>
+
+<script>
+// Wait for EVERYTHING to load, not just DOM
+jQuery(window).on('load', function($) {
     
-    <script>
-        // Function to reset domain dropdown when company changes
-        function resetDomainAndSubmit(selectElement) {
-            document.getElementById('domainSelect').value = '';
-            selectElement.form.submit();
-        }
+    // Also re-run after a short delay to catch late-loading elements
+    setTimeout(function() {
         
-        function toggleDetails(button) {
-            // Prevent any default behavior
-            if (event) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
+        // Toggle details using jQuery delegation
+        $(document).off('click', '.expand-btn'); // Remove any existing handlers
+        $(document).on('click', '.expand-btn', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             
-            const card = button.closest('.rule-card');
-            const details = card.querySelector('.rule-details');
-            const icon = button.querySelector('i');
+            var $card = $(this).closest('.rule-card');
+            var $details = $card.find('.rule-details');
             
-            if (details.classList.contains('collapsed')) {
-                details.classList.remove('collapsed');
-                icon.classList.remove('fa-chevron-down');
-                icon.classList.add('fa-chevron-up');
-                button.innerHTML = '<i class="fas fa-chevron-up"></i> Hide';
+            if ($details.hasClass('collapsed')) {
+                $details.removeClass('collapsed').css('display', 'grid');
+                $(this).html('<i class="fas fa-chevron-up"></i> Hide');
             } else {
-                details.classList.add('collapsed');
-                icon.classList.remove('fa-chevron-up');
-                icon.classList.add('fa-chevron-down');
-                button.innerHTML = '<i class="fas fa-chevron-down"></i> Details';
+                $details.addClass('collapsed').css('display', 'none');
+                $(this).html('<i class="fas fa-chevron-down"></i> Details');
             }
-            
-            return false;
-        }
-        
-        function toggleSelection(checkbox) {
-            const card = checkbox.closest('.rule-card');
-            if (checkbox.checked) {
-                card.classList.add('selected');
-            } else {
-                card.classList.remove('selected');
-            }
-            updateSelectionCounter();
-        }
-        
-        function updateSelectionCounter() {
-            const selectedCount = document.querySelectorAll('.rule-checkbox:checked').length;
-            let counter = document.getElementById('selectionCounter');
-            
-            if (selectedCount > 0) {
-                if (!counter) {
-                    counter = document.createElement('div');
-                    counter.id = 'selectionCounter';
-                    counter.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background: #667eea; color: white; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000; font-weight: 600;';
-                    document.body.appendChild(counter);
-                }
-                counter.innerHTML = `<i class="fas fa-check-circle"></i> ${selectedCount} rule${selectedCount > 1 ? 's' : ''} selected`;
-                counter.style.display = 'block';
-            } else if (counter) {
-                counter.style.display = 'none';
-            }
-        }
-
-        // MetisMenu initialization - wait for full page load
-        jQuery(document).ready(function($) {
-            // Initialize metismenu
-            if (typeof $.fn.metisMenu === 'function') {
-                $('.metismenu').metisMenu();
-            }
-            
-            // Ensure menu clicks work by preventing event bubbling issues
-            $('.metismenu a').on('click', function(e) {
-                // Don't prevent default for actual links
-                if ($(this).attr('href') && $(this).attr('href') !== 'javascript:;' && $(this).attr('href') !== '#') {
-                    return true;
-                }
-            });
         });
-    </script>
+        
+        console.log('Toggle handlers attached to ' + $('.expand-btn').length + ' buttons');
+        
+    }, 500); // Wait 500ms after page load
+});
+</script>
+<script>
+// FORCE re-apply theme after everything loads
+window.addEventListener('load', function() {
+    applyThemeFromStorage();
+    console.log('Theme re-applied after full load');
+});
+
+// And for the toggle buttons - use event delegation that works no matter what
+$(document).on('click', '.expand-btn', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    var $card = $(this).closest('.rule-card');
+    var $details = $card.find('.rule-details');
+    
+    if ($details.hasClass('collapsed')) {
+        $details.removeClass('collapsed').css('display', 'grid');
+        $(this).html('<i class="fas fa-chevron-up"></i> Hide');
+    } else {
+        $details.addClass('collapsed').css('display', 'none');
+        $(this).html('<i class="fas fa-chevron-down"></i> Details');
+    }
+});
+
+console.log('All handlers attached');
+</script>
 </body>
 </html>

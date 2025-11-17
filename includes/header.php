@@ -641,5 +641,5 @@ if (!$user) {
     </div>
 </header>
 
-<!-- Add PerfectScrollbar JS -->
+
 

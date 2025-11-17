@@ -379,11 +379,15 @@ function getSavedData_2($conn, $selected_domain, $filter_by, $selected_company =
 
     if (!empty($selected_domain)) {
         $where[] = "c.sending_domain = ?";
-        $params[] = $selected_domain; $types[] = 's';
-    } elseif (!empty($selected_company)) {
-        // IMPORTANT: filter by companies.name via the JOIN above
+        $params[] = $selected_domain; 
+        $types[] = 's';
+    }
+
+    if (!empty($selected_company)) {
+        // Filter by companies.name via the JOIN above
         $where[] = "comp.name = ?";
-        $params[] = $selected_company; $types[] = 's';
+        $params[] = $selected_company; 
+        $types[] = 's';
     }
 
     if (!empty($selected_user_domain)) {
