@@ -7,9 +7,21 @@ global $conn;
 if (!isset($_SESSION['user_id'])) die("No user_id in session.");
 $user_id = $_SESSION['user_id']; 
 
+// Get POST values
 $selected_domain = $_POST['domain'] ?? ''; 
 $selected_user_domain = $_POST['user_domain'] ?? ''; 
 $selected_company = $_POST['company'] ?? ''; 
+
+// CRITICAL FIX: Check if company changed and reset domain/user_domain filters
+if (isset($_POST['company']) && isset($_SESSION['last_selected_company'])) {
+    if ($_SESSION['last_selected_company'] !== $_POST['company']) {
+        // Company changed - reset domain and user_domain filters
+        $selected_domain = '';
+        $selected_user_domain = '';
+    }
+}
+// Store current company selection for next request
+$_SESSION['last_selected_company'] = $selected_company;
 
 $sql = "SELECT u.admin, u.company AS company_id, c.name AS company_name FROM users u LEFT JOIN companies c ON u.company = c.id WHERE u.id = ?";
 $stmt = $conn->prepare($sql);
@@ -30,7 +42,16 @@ if ($category_result && $category_result->num_rows > 0) {
 }
 
 $dsli_options = ['Auto', '15', '30', '45', '60', '90', '120', '150', '180', '365', '1000'];
-$saved_data_result = getSavedData_2($conn, $selected_domain, 'sending_domain', $selected_company, $selected_user_domain);
+
+// FIX: getSavedData_2 returns an ARRAY, not a mysqli_result
+$saved_data_array = getSavedData_2($conn, $selected_domain, 'sending_domain', $selected_company, $selected_user_domain);
+
+// DEBUG: Log for troubleshooting
+error_log("=== VDMS Suite Debug ===");
+error_log("Selected Company: " . $selected_company);
+error_log("Selected Domain: " . $selected_domain);
+error_log("Selected User Domain: " . $selected_user_domain);
+error_log("Data count: " . count($saved_data_array));
 
 function getCountries($conn) {
     $sql = "SELECT id, name, short FROM countries WHERE 1";
@@ -51,61 +72,154 @@ $countries = getCountries($conn);
     <link rel="stylesheet" href="assets/css/vdms_suite.css">
     <link rel="stylesheet" href="assets/css/dark-theme.css"/>
     <style>
+    /* Hide first menu item (Dashboard) */
     #menu > li:first-child { display: none !important; }
-    .rule-details.collapsed { display: none !important; }
+    
+    /* FIXED: Country badge - much darker for readability */
+    .country-badge {
+        padding: 0.35rem 0.6rem !important;
+        background: #2c3e50 !important;
+        color: white !important;
+        border-radius: 4px !important;
+        font-weight: 700 !important;
+        font-size: 11px !important;
+        border: 1px solid #1a252f !important;
+    }
+    
+    /* Dark mode country badge */
+    html.dark-theme .country-badge,
+    html[data-bs-theme="dark"] .country-badge {
+        background: #495057 !important;
+        color: white !important;
+        border-color: #343a40 !important;
+    }
+    
+    /* FIXED: Health score badges - better contrast */
+    .health-score {
+        padding: 0.35rem 0.6rem !important;
+        border-radius: 4px !important;
+        font-weight: 700 !important;
+        font-size: 12px !important;
+        min-width: 45px !important;
+        text-align: center !important;
+    }
+
+    .health-excellent {
+        background: #28a745 !important;
+        color: white !important;
+        border: 1px solid #1e7e34 !important;
+    }
+
+    .health-good {
+        background: #17a2b8 !important;
+        color: white !important;
+        border: 1px solid #117a8b !important;
+    }
+
+    .health-warning {
+        background: #ffc107 !important;
+        color: #000 !important;
+        border: 1px solid #e0a800 !important;
+    }
+
+    .health-danger {
+        background: #dc3545 !important;
+        color: white !important;
+        border: 1px solid #bd2130 !important;
+    }
+    
+    /* Dark mode health scores */
+    html.dark-theme .health-excellent,
+    html[data-bs-theme="dark"] .health-excellent {
+        background: #218838 !important;
+        border-color: #1e7e34 !important;
+    }
+    
+    html.dark-theme .health-good,
+    html[data-bs-theme="dark"] .health-good {
+        background: #138496 !important;
+        border-color: #117a8b !important;
+    }
+    
+    html.dark-theme .health-warning,
+    html[data-bs-theme="dark"] .health-warning {
+        background: #e0a800 !important;
+        color: #000 !important;
+        border-color: #d39e00 !important;
+    }
+    
+    html.dark-theme .health-danger,
+    html[data-bs-theme="dark"] .health-danger {
+        background: #c82333 !important;
+        border-color: #bd2130 !important;
+    }
+    
+    /* Expand button must be clickable */
     .expand-btn { 
         cursor: pointer !important; 
         pointer-events: auto !important;
-        z-index: 10 !important;
+        z-index: 100 !important;
         position: relative !important;
+        background: white !important;
+        border: 1px solid #dee2e6 !important;
+        border-radius: 6px !important;
+        padding: 0.35rem 0.7rem !important;
+        font-size: 11px !important;
+        transition: all 0.2s !important;
+        flex-shrink: 0 !important;
     }
-    /* FIX: Ensure nothing blocks the button */
+    
+    .expand-btn:hover {
+        background: #0c5a8a !important;
+        color: white !important;
+        border-color: #0c5a8a !important;
+    }
+    
+    /* Rule details visibility */
+    .rule-details {
+        display: none !important;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)) !important;
+        gap: 0.75rem !important;
+        margin-top: 0.75rem !important;
+        padding-top: 0.75rem !important;
+        border-top: 1px solid #e9ecef !important;
+    }
+    
+    .rule-details.show {
+        display: grid !important;
+    }
+    
+    /* Ensure nothing blocks clicks */
     .rule-header {
         pointer-events: auto !important;
         position: relative !important;
+        z-index: 1 !important;
     }
+    
     .rule-card {
         pointer-events: auto !important;
+        position: relative !important;
     }
-    /* FIX: Prevent overlays from blocking clicks */
+    
+    /* Remove any overlays that might block */
     .overlay, .offcanvas-backdrop, .sidebar-overlay {
         pointer-events: none !important;
-        display: none !important;
     }
-    /* FIX: Dark mode shouldn't affect clickability */
+    
+    /* Dark mode compatibility */
     html.dark-theme .expand-btn,
-    html.light-theme .expand-btn,
-    html[data-bs-theme="dark"] .expand-btn,
-    html[data-bs-theme="light"] .expand-btn {
-        pointer-events: auto !important;
-        z-index: 10 !important;
+    html[data-bs-theme="dark"] .expand-btn {
+        background: #2c3e50 !important;
+        border-color: #495057 !important;
+        color: white !important;
+    }
+    
+    html.dark-theme .expand-btn:hover,
+    html[data-bs-theme="dark"] .expand-btn:hover {
+        background: #0c5a8a !important;
+        border-color: #0c5a8a !important;
     }
     </style>
-    <style>
-#menu > li:first-child { display: none !important; }
-.rule-details.collapsed { 
-    display: none !important; 
-    visibility: hidden !important;
-    height: 0 !important;
-    overflow: hidden !important;
-}
-.rule-details:not(.collapsed) {
-    display: grid !important;
-    visibility: visible !important;
-    height: auto !important;
-}
-.expand-btn { 
-    cursor: pointer !important; 
-    pointer-events: auto !important;
-    z-index: 100 !important;
-    position: relative !important;
-    background: transparent !important;
-    border: 1px solid #ccc !important;
-}
-.rule-header > * {
-    pointer-events: auto !important;
-}
-</style>
 </head>
 <body>
 <div class="wrapper">
@@ -116,12 +230,22 @@ $countries = getCountries($conn);
                 <h2><i class="fas fa-cogs"></i> VDMS Suite - Rules Configuration</h2>
             </div>
             
+            <!-- DEBUG INFO (remove in production) -->
+            <?php if ($is_admin): ?>
+            <div class="alert alert-info" style="font-size: 11px;">
+                <strong>Debug:</strong> Company: <?=htmlspecialchars($selected_company)?> | 
+                Domain: <?=htmlspecialchars($selected_domain)?> | 
+                User Domain: <?=htmlspecialchars($selected_user_domain)?> | 
+                Records: <?=count($saved_data_array)?>
+            </div>
+            <?php endif; ?>
+            
             <div class="filters-section">
-                <form method="post">
+                <form method="post" id="filterForm">
                     <div class="row g-3">
                         <div class="col-md-4">
                             <label class="form-label fw-bold"><i class="fas fa-building"></i> Company</label>
-                            <select class="form-select" name="company" onchange="this.form.submit()">
+                            <select class="form-select" name="company" id="companySelect" onchange="this.form.submit()">
                             <?php
                             $sql_companies = "SELECT id, name FROM companies";
                             if ($is_admin != 1) $sql_companies .= " WHERE id = ?";
@@ -168,7 +292,7 @@ $countries = getCountries($conn);
                                     $n = $udr['name'] ?? '';
                                     $vn = htmlspecialchars($n);
                                     $sel = ($selected_user_domain === $n) ? 'selected' : '';
-                                    echo "<option value='$vn' $sel>$vn</option>";
+                                    echo "<option value='$n' $sel>$vn</option>";
                                 }
                             }
                             ?>
@@ -177,56 +301,147 @@ $countries = getCountries($conn);
                     </div>
                 </form>
             </div>
-            
-            <div id="rulesList">
-            <?php
-            if ($saved_data_result && count($saved_data_result) > 0) {
-                foreach ($saved_data_result as $sr) {
-                    $sd = $sr['sending_domain'];
-                    $ud = $sr['user_domain'];
-                    $cs = isset($countries[$sr['country_id']]) ? $countries[$sr['country_id']]['short'] : 'N/A';
-            ?>
-                <div class="rule-card">
+
+            <div class="rules-container">
+            <?php 
+            // FIX: Check if array is not empty instead of using num_rows
+            if (!empty($saved_data_array) && is_array($saved_data_array)) {
+                foreach ($saved_data_array as $sr) { ?>
+                <div class="rule-card" data-rule-id="<?=$sr['id']?>">
                     <div class="rule-header">
-                        <div class="header-col col-sending-domain"><span class="col-label">Domain</span><div class="domain-badge"><?=htmlspecialchars($sd)?></div></div>
-                        <div class="header-col col-user-domain"><span class="col-label">User Domain</span><div class="user-domain-badge"><?=htmlspecialchars($ud)?></div></div>
-                        <div class="header-col col-country"><span class="col-label">Country</span><div class="country-badge">🌍 <?=htmlspecialchars($cs)?></div></div>
-                        <div class="header-col col-sendables"><span class="col-label">Sendables</span><div class="col-value"><?=number_format($sr['sendables'])?></div></div>
-                        <div class="header-col col-actives"><span class="col-label">ACT/SEND</span><div class="col-value"><?=number_format($sr['actives'])?></div></div>
-                        <div class="header-col col-sent-tm"><span class="col-label">Sent TM</span><div class="col-value"><?=number_format($sr['sent_amount'])?></div></div>
-                        <div class="header-col col-clicks-tm"><span class="col-label">Clicks</span><div class="col-value"><?=number_format($sr['clickers'])?></div></div>
-                        <div class="header-col col-small"><span class="col-label">OR</span><div class="col-value"><?=number_format($sr['open_rate'], 1)?>%</div></div>
-                        <div class="header-col col-small"><span class="col-label">CR</span><div class="col-value"><?=number_format($sr['click_rate'], 1)?>%</div></div>
-                        <div class="header-col col-small"><span class="col-label">BR</span><div class="col-value"><?=number_format($sr['bounce_rate'], 2)?>%</div></div>
-                        <div class="header-col col-dsli"><span class="col-label">DSLI</span>
+                        <input type="checkbox" class="rule-checkbox" name="selected[]" value="<?=$sr['id']?>">
+                        
+                        <div class="header-col col-sending-domain">
+                            <span class="col-label">Sending Domain</span>
+                            <span class="col-value domain-badge"><?=htmlspecialchars($sr['sending_domain'] ?? 'N/A')?></span>
+                        </div>
+                        
+                        <div class="header-col col-user-domain">
+                            <span class="col-label">User Domain</span>
+                            <span class="col-value user-domain-badge"><?=htmlspecialchars($sr['user_domain'] ?? 'N/A')?></span>
+                        </div>
+                        
+                        <div class="header-col col-country">
+                            <span class="col-label">Country</span>
+                            <span class="col-value country-badge"><?=htmlspecialchars($countries[$sr['country']]['short'] ?? 'N/A')?></span>
+                        </div>
+                        
+                        <div class="header-col col-sendables">
+                            <span class="col-label">Sendables</span>
+                            <span class="col-value"><?=number_format($sr['sendables'] ?? 0)?></span>
+                        </div>
+                        
+                        <div class="header-col col-actives">
+                            <span class="col-label">Actives</span>
+                            <span class="col-value"><?=number_format($sr['actives'] ?? 0)?></span>
+                        </div>
+                        
+                        <div class="header-col col-sent-tm">
+                            <span class="col-label">Sent T&M</span>
+                            <span class="col-value"><?=number_format($sr['sent_tm'] ?? 0)?></span>
+                        </div>
+                        
+                        <div class="header-col col-clicks-tm">
+                            <span class="col-label">Clicks T&M</span>
+                            <span class="col-value"><?=number_format($sr['clicks_tm'] ?? 0)?></span>
+                        </div>
+                        
+                        <div class="header-col col-health">
+                            <span class="col-label">Health</span>
+                            <?php 
+                            $health = $sr['health_score'] ?? 0;
+                            $health_class = $health >= 80 ? 'health-excellent' : ($health >= 60 ? 'health-good' : ($health >= 40 ? 'health-warning' : 'health-danger'));
+                            ?>
+                            <span class="col-value health-score <?=$health_class?>"><?=$health?>%</span>
+                        </div>
+                        
+                        <div class="header-col col-dsli">
+                            <span class="col-label">DSLI</span>
                             <select class="form-select form-select-sm" name="dsli[<?=$sr['id']?>]">
                                 <?php foreach ($dsli_options as $opt): ?>
-                                <option value="<?=$opt?>" <?=($sr['dsli'] == $opt) ? 'selected' : ''?>><?=$opt?></option>
+                                <option value="<?=$opt?>" <?=($sr['dsli'] ?? 'Auto') == $opt ? 'selected' : ''?>><?=$opt?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="header-col col-status"><span class="col-label">Status</span>
+                        
+                        <div class="header-col col-status">
+                            <span class="col-label">Status</span>
                             <select class="form-select form-select-sm" name="status[<?=$sr['id']?>]">
                                 <?php foreach ($all_categories as $cat): ?>
                                 <option value="<?=htmlspecialchars($cat)?>" <?=(($sr['category'] ?? 'Auto') == $cat) ? 'selected' : ''?>><?=htmlspecialchars($cat)?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <button class="expand-btn" type="button"><i class="fas fa-chevron-down"></i> Details</button>
+                        
+                        <button class="expand-btn" type="button">
+                            <i class="fas fa-chevron-down"></i> Details
+                        </button>
                     </div>
-                    <div class="rule-details collapsed">
-                        <div class="metric-box"><span class="metric-label">Clickers</span><span class="metric-value"><?=number_format($sr['clickers'])?></span></div>
-                        <div class="metric-box"><span class="metric-label">Openers</span><span class="metric-value"><?=number_format($sr['openers'])?></span></div>
-                        <div class="metric-box"><span class="metric-label">Reactivated</span><span class="metric-value"><?=number_format($sr['reactivated'])?></span></div>
-                        <div class="metric-box"><span class="metric-label">Preactivated</span><span class="metric-value"><?=number_format($sr['preactivated'])?></span></div>
-                        <div class="metric-box"><span class="metric-label">Halfslept</span><span class="metric-value"><?=number_format($sr['halfslept'])?></span></div>
-                        <div class="metric-box"><span class="metric-label">Awaken</span><span class="metric-value"><?=number_format($sr['awaken'])?></span></div>
-                        <div class="metric-box"><span class="metric-label">Whitelist</span><span class="metric-value"><?=number_format($sr['whitelist'])?></span></div>
-                        <div class="metric-box"><span class="metric-label">New</span><span class="metric-value"><?=number_format($sr['new'])?></span></div>
-                        <div class="metric-box"><span class="metric-label">Slept</span><span class="metric-value"><?=number_format($sr['slept'])?></span></div>
+                    
+                    <div class="rule-details">
+                        <div class="metric-box">
+                            <span class="metric-label">Clickers</span>
+                            <span class="metric-value"><?=number_format($sr['clickers'] ?? 0)?></span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-label">Openers</span>
+                            <span class="metric-value"><?=number_format($sr['openers'] ?? 0)?></span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-label">Reactivated</span>
+                            <span class="metric-value"><?=number_format($sr['reactivated'] ?? 0)?></span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-label">Preactivated</span>
+                            <span class="metric-value"><?=number_format($sr['preactivated'] ?? 0)?></span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-label">Halfslept</span>
+                            <span class="metric-value"><?=number_format($sr['halfslept'] ?? 0)?></span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-label">Awaken</span>
+                            <span class="metric-value"><?=number_format($sr['awaken'] ?? 0)?></span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-label">Whitelist</span>
+                            <span class="metric-value"><?=number_format($sr['whitelist'] ?? 0)?></span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-label">New</span>
+                            <span class="metric-value"><?=number_format($sr['new'] ?? 0)?></span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-label">Slept</span>
+                            <span class="metric-value"><?=number_format($sr['slept'] ?? 0)?></span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-label">Keepalive</span>
+                            <span class="metric-value"><?=number_format($sr['keepalive'] ?? 0)?></span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-label">Stranger</span>
+                            <span class="metric-value"><?=number_format($sr['stranger'] ?? 0)?></span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-label">New Inactive</span>
+                            <span class="metric-value"><?=number_format($sr['new_inactive'] ?? 0)?></span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-label">Total Inactive</span>
+                            <span class="metric-value"><?=number_format($sr['total_inactive'] ?? 0)?></span>
+                        </div>
                     </div>
                 </div>
-            <?php }} else { echo '<div class="alert alert-info">No rules found</div>'; } ?>
+            <?php }
+            } else { 
+                // Show more detailed error message
+                if ($selected_company) {
+                    echo '<div class="alert alert-warning">No rules found for company: <strong>' . htmlspecialchars($selected_company) . '</strong>. Try selecting "All Companies" or a different domain.</div>'; 
+                } else {
+                    echo '<div class="alert alert-info">Select a company above to view rules, or choose "All Companies" to see all available data.</div>'; 
+                }
+            } ?>
             </div>
         </div>
     </div>
@@ -240,27 +455,46 @@ $countries = getCountries($conn);
 <script src="assets/js/app.js"></script>
 
 <script>
-// Use jQuery click handler instead of vanilla JS
-jQuery(document).ready(function($) {
+// Simple, reliable toggle functionality
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('VDMS Suite: Initializing expand buttons');
     
-    // Toggle details using jQuery delegation (works for all elements, even dynamically loaded)
-    $(document).on('click', '.expand-btn', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
+    // Use event delegation for reliability
+    document.addEventListener('click', function(e) {
+        // Check if clicked element is expand button or its child
+        const expandBtn = e.target.closest('.expand-btn');
         
-        var $card = $(this).closest('.rule-card');
-        var $details = $card.find('.rule-details');
-        
-        if ($details.hasClass('collapsed')) {
-            $details.removeClass('collapsed').css('display', 'grid');
-            $(this).html('<i class="fas fa-chevron-up"></i> Hide');
-        } else {
-            $details.addClass('collapsed').css('display', 'none');
-            $(this).html('<i class="fas fa-chevron-down"></i> Details');
+        if (expandBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log('Expand button clicked');
+            
+            // Find the rule card and details section
+            const ruleCard = expandBtn.closest('.rule-card');
+            const ruleDetails = ruleCard.querySelector('.rule-details');
+            const icon = expandBtn.querySelector('i');
+            
+            // Toggle the details
+            if (ruleDetails.classList.contains('show')) {
+                ruleDetails.classList.remove('show');
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+                expandBtn.innerHTML = '<i class="fas fa-chevron-down"></i> Details';
+            } else {
+                ruleDetails.classList.add('show');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+                expandBtn.innerHTML = '<i class="fas fa-chevron-up"></i> Hide';
+            }
+            
+            console.log('Toggle completed');
         }
     });
     
-    console.log('Toggle handlers attached to ' + $('.expand-btn').length + ' buttons');
+    // Log button count
+    const buttonCount = document.querySelectorAll('.expand-btn').length;
+    console.log(`Found ${buttonCount} expand buttons`);
 });
 </script>
 </body>
