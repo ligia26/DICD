@@ -45,10 +45,12 @@
     color: rgba(255, 255, 255, 0.9) !important;
     padding: 14px 20px !important;
     border-radius: 8px !important;
+    text-decoration: none !important;
 }
 
 .sidebar-wrapper .metismenu a:hover {
     background: rgba(255, 255, 255, 0.1) !important;
+    text-decoration: none !important;
 }
 
 .sidebar-wrapper .metismenu ul {
