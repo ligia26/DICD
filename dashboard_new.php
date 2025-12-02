@@ -4,7 +4,6 @@ include 'includes/functions.php';
 
 session_start();
 
-// Auth Check (Recommended, ensure user_id exists before proceeding)
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
@@ -12,7 +11,6 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-// NOTE: Assuming getUserData and getCompanyName functions retrieve data from your database correctly.
 $user_data = getUserData($conn, $user_id);
 $company = isset($user_data['company']) ? $user_data['company'] : '';
 $company_details = getCompanyName($conn, $company);
@@ -21,12 +19,10 @@ $is_admin = $user_data['admin'];
 
 $company_name_trimmed = trim($company_name);
 $module_status = [
-    // Base keys for all 9 dashboard cards
     'mautic' => 'N', 'vmds' => 'N', 'tableau' => 'N', 'cleaning' => 'N', 'warmy' => 'N', 'brandexpand' => 'N',
     'consulting' => 'N', 'tech_hours' => 'N', 'billing' => 'N'     
 ];
 
-// Check company and set module status based *strictly* on the spreadsheet data
 switch ($company_name_trimmed) {
     case 'Data Innovation':
     case 'DAIN': 
@@ -38,7 +34,7 @@ switch ($company_name_trimmed) {
     case 'Feebbo Digital':
     case 'FEEB':
         $module_status = [
-            'mautic' => 'Y', 'vmds' => 'Y', 'tableau' => 'N', 'cleaning' => 'Y', 'warmy' => 'Y', 'brandexpand' => 'Y',
+            'mautic' => 'Y', 'vmds' => 'Y', 'tableau' => 'N', 'cleaning' => 'Y', 'warmy' => 'Y', 'brandexpand' => 'N',
             'consulting' => 'Y', 'tech_hours' => 'Y', 'billing' => 'Y'
         ];
         break;
@@ -52,8 +48,8 @@ switch ($company_name_trimmed) {
     case 'CPC Seguro':
     case 'CPCS':
         $module_status = [
-            'mautic' => 'Y', 'vmds' => 'Y', 'tableau' => 'Y', 'cleaning' => 'Y', 'warmy' => 'Y', 'brandexpand' => 'Y',
-            'consulting' => 'Y', 'tech_hours' => 'Y', 'billing' => 'Y'
+            'mautic' => 'Y', 'vmds' => 'Y', 'tableau' => 'Y', 'cleaning' => 'Y', 'warmy' => 'Y', 'brandexpand' => 'N',
+            'consulting' => 'N', 'tech_hours' => 'Y', 'billing' => 'Y'
         ];
         break;
     case 'Cash Cow':
@@ -66,15 +62,15 @@ switch ($company_name_trimmed) {
     case 'Kum Media':
     case 'KUMM':
         $module_status = [
-            'mautic' => 'Y', 'vmds' => 'Y', 'tableau' => 'Y', 'cleaning' => 'N', 'warmy' => 'N', 'brandexpand' => 'Y',
+            'mautic' => 'Y', 'vmds' => 'Y', 'tableau' => 'Y', 'cleaning' => 'N', 'warmy' => 'N', 'brandexpand' => 'N',
             'consulting' => 'Y', 'tech_hours' => 'Y', 'billing' => 'Y'
         ];
         break;
     case 'AdviceMe':
     case 'Advice Me':
-    case 'ADVM': // Consulting is '-' (N), Tech Hours is '-' (N)
+    case 'ADVM':
         $module_status = [
-            'mautic' => 'Y', 'vmds' => 'Y', 'tableau' => 'Y', 'cleaning' => 'N', 'warmy' => 'N', 'brandexpand' => 'Y',
+            'mautic' => 'Y', 'vmds' => 'Y', 'tableau' => 'Y', 'cleaning' => 'N', 'warmy' => 'N', 'brandexpand' => 'N',
             'consulting' => 'N', 'tech_hours' => 'N', 'billing' => 'Y'
         ];
         break;
@@ -98,7 +94,7 @@ switch ($company_name_trimmed) {
         break;
     case 'TDEN': 
         $module_status = [
-            'mautic' => 'N', 'vmds' => 'Y', 'tableau' => 'Y', 'cleaning' => 'Y', 'warmy' => 'Y', 'brandexpand' => 'Y',
+            'mautic' => 'N', 'vmds' => 'Y', 'tableau' => 'Y', 'cleaning' => 'Y', 'warmy' => 'Y', 'brandexpand' => 'N',
             'consulting' => 'N', 'tech_hours' => 'N', 'billing' => 'Y'
         ];
         break;
@@ -109,7 +105,6 @@ switch ($company_name_trimmed) {
         ];
         break;
     default:
-        // All modules inactive for unknown companies
         break;
 }
 ?>
@@ -121,14 +116,12 @@ switch ($company_name_trimmed) {
     <title>Dashboard - Data Innovation</title>
     
     <style>
-        /* Define Blue Colors for consistency */
         :root {
-            --primary-blue: #0c5a8a; /* Medium Blue */
-            --dark-blue: #094366;    /* Dark Blue/Hover */
+            --primary-blue: #0c5a8a;
+            --dark-blue: #094366;
             --focus-shadow: rgba(12, 90, 138, 0.25);
         }
 
-        /* DASHBOARD CARD STYLES */
         .dashboard-card {
             background: white !important;
             border-radius: 12px !important;
@@ -136,10 +129,8 @@ switch ($company_name_trimmed) {
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
             margin-bottom: 24px !important;
             min-height: 250px !important; 
-            height: auto !important;
             display: flex !important;
             flex-direction: column !important;
-            overflow: hidden !important;
         }
 
         .card-header-with-action {
@@ -174,7 +165,6 @@ switch ($company_name_trimmed) {
             color: #2c3e50 !important;
         }
 
-        /* Blue Theme Button Styles */
         .btn-upgrade {
             background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%) !important;
             color: white !important;
@@ -188,10 +178,19 @@ switch ($company_name_trimmed) {
         .btn-activate {
             background: #e9ecef !important;
             color: #495057 !important;
-            border: none !important;
-            padding: 6px 12px !important;
-            border-radius: 4px !important;
-            font-size: 12px !important;
+            border: 1px solid #dee2e6 !important;
+            padding: 8px 16px !important;
+            border-radius: 6px !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            cursor: pointer !important;
+            transition: all 0.2s !important;
+        }
+        
+        .btn-activate:hover {
+            background: var(--primary-blue) !important;
+            color: white !important;
+            border-color: var(--primary-blue) !important;
         }
 
         .btn-primary {
@@ -203,30 +202,18 @@ switch ($company_name_trimmed) {
             border-color: var(--dark-blue) !important;
         }
         
-        /* Progress Bar */
-        .progress-bar-custom {
-            width: 100% !important;
-            height: 8px !important;
-            background: #e9ecef !important;
-            border-radius: 4px !important;
-            overflow: hidden !important;
-        }
-
-        .progress-fill {
-            height: 100% !important;
-            background: linear-gradient(90deg, var(--primary-blue) 0%, #1a7bb8 100%) !important;
-            border-radius: 4px !important;
-            transition: width 0.3s ease !important;
+        .inactive-module {
             display: flex !important;
+            flex-direction: column !important;
             align-items: center !important;
-            justify-content: flex-end !important;
-            padding-right: 8px !important;
+            justify-content: center !important;
+            padding: 40px 20px !important;
+            text-align: center !important;
         }
         
-        .progress-text {
-            font-size: 11px !important;
-            color: #fff !important;
-            font-weight: 600 !important;
+        .inactive-module p {
+            color: #6c757d !important;
+            margin-bottom: 16px !important;
         }
     </style>
 </head>
@@ -244,6 +231,7 @@ switch ($company_name_trimmed) {
             </div>
 
             <div class="row">
+                <!-- Mautic Stack -->
                 <div class="col-12 col-xl-4 mb-4">
                     <div class="dashboard-card">
                         <div class="card-header-with-action">
@@ -251,7 +239,7 @@ switch ($company_name_trimmed) {
                             <?php if ($module_status['mautic'] == 'Y'): ?>
                                 <span class="badge bg-success">Active</span>
                             <?php else: ?>
-                                <button class="btn btn-activate btn-sm">Activate module</button>
+                                <button class="btn btn-activate btn-sm">Activate</button>
                             <?php endif; ?>
                         </div>
                         
@@ -265,41 +253,43 @@ switch ($company_name_trimmed) {
                             <span class="stat-value">6%</span>
                         </div>
                         <?php else: ?>
-                        <div class="text-center py-5">
-                            <p class="text-muted">Module not activated</p>
+                        <div class="inactive-module">
+                            <p>Module not activated</p>
                         </div>
                         <?php endif; ?>
                     </div>
                 </div>
 
+                <!-- VDMS -->
                 <div class="col-12 col-xl-4 mb-4">
                     <div class="dashboard-card">
                         <div class="card-header-with-action">
-                            <h5 class="dashboard-card-title mb-0">Volume Deliverability Manager Suite</h5>
+                            <h5 class="dashboard-card-title mb-0">VDMS</h5>
                             <?php if ($module_status['vmds'] == 'Y'): ?>
                                 <span class="badge bg-success">Active</span>
                             <?php else: ?>
-                                <button class="btn btn-activate btn-sm">Activate module</button>
+                                <button class="btn btn-activate btn-sm">Activate</button>
                             <?php endif; ?>
                         </div>
                         
                         <?php if ($module_status['vmds'] == 'Y'): ?>
-                        <div class="mt-3">
-                            <p class="stat-label mb-2">Domain health score</p>
-                            <div class="progress-bar-custom">
-                                <div class="progress-fill" style="width: 75%;">
-                                    <span class="progress-text">75%</span>
-                                </div>
-                            </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Domains monitored</span>
+                            <span class="stat-value">45</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Avg health score</span>
+                            <span class="stat-value">75%</span>
                         </div>
                         <?php else: ?>
-                        <div class="text-center py-5">
-                            <p class="text-muted">Module not activated</p>
+                        <div class="inactive-module">
+                            <p>Module not activated</p>
                         </div>
                         <?php endif; ?>
                     </div>
                 </div>
 
+                <!-- BrandExpand -->
                 <div class="col-12 col-xl-4 mb-4">
                     <div class="dashboard-card">
                         <div class="card-header-with-action">
@@ -307,7 +297,7 @@ switch ($company_name_trimmed) {
                             <?php if ($module_status['brandexpand'] == 'Y'): ?>
                                 <span class="badge bg-success">Active</span>
                             <?php else: ?>
-                                <button class="btn btn-activate btn-sm">Activate module</button>
+                                <button class="btn btn-activate btn-sm">Activate</button>
                             <?php endif; ?>
                         </div>
                         
@@ -317,8 +307,8 @@ switch ($company_name_trimmed) {
                             <span class="stat-value">146</span>
                         </div>
                         <?php else: ?>
-                        <div class="text-center py-5">
-                            <p class="text-muted">Module not activated</p>
+                        <div class="inactive-module">
+                            <p>Module not activated</p>
                         </div>
                         <?php endif; ?>
                     </div>
@@ -326,6 +316,7 @@ switch ($company_name_trimmed) {
             </div>
 
             <div class="row">
+                <!-- Data Cleaning -->
                 <div class="col-12 col-xl-4 mb-4">
                     <div class="dashboard-card">
                         <div class="card-header-with-action">
@@ -333,7 +324,7 @@ switch ($company_name_trimmed) {
                             <?php if ($module_status['cleaning'] == 'Y'): ?>
                                 <span class="badge bg-success">Active</span>
                             <?php else: ?>
-                                <button class="btn btn-activate btn-sm">Activate module</button>
+                                <button class="btn btn-activate btn-sm">Activate</button>
                             <?php endif; ?>
                         </div>
                         
@@ -343,13 +334,14 @@ switch ($company_name_trimmed) {
                             <span class="stat-value">832</span>
                         </div>
                         <?php else: ?>
-                        <div class="text-center py-4">
-                            <p class="text-muted">Module not activated</p>
+                        <div class="inactive-module">
+                            <p>Module not activated</p>
                         </div>
                         <?php endif; ?>
                     </div>
                 </div>
 
+                <!-- Warmy -->
                 <div class="col-12 col-xl-4 mb-4">
                     <div class="dashboard-card">
                         <div class="card-header-with-action">
@@ -357,7 +349,7 @@ switch ($company_name_trimmed) {
                             <?php if ($module_status['warmy'] == 'Y'): ?>
                                 <span class="badge bg-success">Active</span>
                             <?php else: ?>
-                                <button class="btn btn-activate btn-sm">Activate module</button>
+                                <button class="btn btn-activate btn-sm">Activate</button>
                             <?php endif; ?>
                         </div>
                         
@@ -371,13 +363,14 @@ switch ($company_name_trimmed) {
                             <span class="stat-value">245</span>
                         </div>
                         <?php else: ?>
-                        <div class="text-center py-5">
-                            <p class="text-muted">Module not activated</p>
+                        <div class="inactive-module">
+                            <p>Module not activated</p>
                         </div>
                         <?php endif; ?>
                     </div>
                 </div>
 
+                <!-- Tableau -->
                 <div class="col-12 col-xl-4 mb-4">
                     <div class="dashboard-card">
                         <div class="card-header-with-action">
@@ -385,7 +378,7 @@ switch ($company_name_trimmed) {
                             <?php if ($module_status['tableau'] == 'Y'): ?>
                                 <span class="badge bg-success">Active</span>
                             <?php else: ?>
-                                <button class="btn btn-activate btn-sm">Activate module</button>
+                                <button class="btn btn-activate btn-sm">Activate</button>
                             <?php endif; ?>
                         </div>
                         
@@ -399,8 +392,8 @@ switch ($company_name_trimmed) {
                             <span class="stat-value">8</span>
                         </div>
                         <?php else: ?>
-                        <div class="text-center py-5">
-                            <p class="text-muted">Module not activated</p>
+                        <div class="inactive-module">
+                            <p>Module not activated</p>
                         </div>
                         <?php endif; ?>
                     </div>
@@ -408,6 +401,7 @@ switch ($company_name_trimmed) {
             </div>
 
             <div class="row">
+                <!-- Consulting Services -->
                 <div class="col-12 col-xl-4 mb-4">
                     <div class="dashboard-card">
                         <div class="card-header-with-action">
@@ -415,7 +409,7 @@ switch ($company_name_trimmed) {
                             <?php if ($module_status['consulting'] == 'Y'): ?>
                                 <span class="badge bg-success">Active</span>
                             <?php else: ?>
-                                <button class="btn btn-activate btn-sm">Activate module</button>
+                                <button class="btn btn-activate btn-sm" onclick="openConsultingForm()">Activate</button>
                             <?php endif; ?>
                         </div>
                         
@@ -432,14 +426,15 @@ switch ($company_name_trimmed) {
                             <button class="btn btn-primary btn-sm w-100">Schedule Session</button>
                         </div>
                         <?php else: ?>
-                        <div class="text-center py-5">
-                            <p class="text-muted">Module not activated</p>
+                        <div class="inactive-module">
+                            <p>Module not activated</p>
                             <p class="small">Contact sales to add consulting hours</p>
                         </div>
                         <?php endif; ?>
                     </div>
                 </div>
 
+                <!-- Tech Support Hours -->
                 <div class="col-12 col-xl-4 mb-4">
                     <div class="dashboard-card">
                         <div class="card-header-with-action">
@@ -447,7 +442,7 @@ switch ($company_name_trimmed) {
                             <?php if ($module_status['tech_hours'] == 'Y'): ?>
                                 <span class="badge bg-success">Active</span>
                             <?php else: ?>
-                                <button class="btn btn-activate btn-sm">Activate module</button>
+                                <button class="btn btn-activate btn-sm" onclick="openTechHoursForm()">Activate</button>
                             <?php endif; ?>
                         </div>
                         
@@ -464,21 +459,27 @@ switch ($company_name_trimmed) {
                             <button class="btn btn-primary btn-sm w-100">Request Support</button>
                         </div>
                         <?php else: ?>
-                        <div class="text-center py-5">
-                            <p class="text-muted">Module not activated</p>
+                        <div class="inactive-module">
+                            <p>Module not activated</p>
                             <p class="small">Upgrade to premium support</p>
                         </div>
                         <?php endif; ?>
                     </div>
                 </div>
 
+                <!-- Invoices & Billing -->
                 <div class="col-12 col-xl-4 mb-4">
                     <div class="dashboard-card">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="card-header-with-action">
                             <h5 class="dashboard-card-title mb-0">Invoices & Billing</h5>
-                            <a href="invoices.php" class="text-primary" style="font-size: 14px;">View all</a>
+                            <?php if ($module_status['billing'] == 'Y'): ?>
+                                <a href="invoices.php" class="text-primary" style="font-size: 14px;">View all</a>
+                            <?php else: ?>
+                                <button class="btn btn-activate btn-sm" onclick="openBillingForm()">Activate</button>
+                            <?php endif; ?>
                         </div>
                         
+                        <?php if ($module_status['billing'] == 'Y'): ?>
                         <div class="stat-card mb-3">
                             <span class="stat-label">Current plan</span>
                             <span class="stat-value">Pro Plan</span>
@@ -493,16 +494,144 @@ switch ($company_name_trimmed) {
                             <span class="stat-label">Next billing date</span>
                             <span class="stat-value">Dec 15, 2025</span>
                         </div>
+                        <?php else: ?>
+                        <div class="inactive-module">
+                            <p>Billing module not activated</p>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
 
         </div>
     </div>
+</div>
 
-    <footer class="page-footer">
-        <p class="mb-0">© 2025 Data Innovation. All rights reserved.</p>
-    </footer>
+<!-- Consulting Modal -->
+<div class="modal fade" id="consultingModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Activate Consulting Services</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="consultingForm">
+                    <div class="mb-3">
+                        <label class="form-label">Company Name</label>
+                        <input type="text" class="form-control" name="company_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Contact Person</label>
+                        <input type="text" class="form-control" name="contact_person" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Requested Hours</label>
+                        <select class="form-select" name="hours" required>
+                            <option value="">Select hours</option>
+                            <option value="10">10 hours/month</option>
+                            <option value="20">20 hours/month</option>
+                            <option value="40">40 hours/month</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-control" name="notes" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Submit Request</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tech Hours Modal -->
+<div class="modal fade" id="techHoursModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Activate Tech Support Hours</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="techHoursForm">
+                    <div class="mb-3">
+                        <label class="form-label">Company Name</label>
+                        <input type="text" class="form-control" name="company_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Contact Email</label>
+                        <input type="email" class="form-control" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" name="phone" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Support Plan</label>
+                        <select class="form-select" name="plan" required>
+                            <option value="">Select plan</option>
+                            <option value="basic">Basic - 20 hours/month</option>
+                            <option value="standard">Standard - 40 hours/month</option>
+                            <option value="premium">Premium - Unlimited</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Additional Requirements</label>
+                        <textarea class="form-control" name="requirements" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Submit Request</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Billing Modal -->
+<div class="modal fade" id="billingModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Activate Billing Module</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="billingForm">
+                    <div class="mb-3">
+                        <label class="form-label">Company Legal Name</label>
+                        <input type="text" class="form-control" name="company_legal_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tax ID / VAT Number</label>
+                        <input type="text" class="form-control" name="tax_id" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Billing Email</label>
+                        <input type="email" class="form-control" name="billing_email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Billing Address</label>
+                        <textarea class="form-control" name="billing_address" rows="2" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Preferred Payment Method</label>
+                        <select class="form-select" name="payment_method" required>
+                            <option value="">Select method</option>
+                            <option value="bank_transfer">Bank Transfer</option>
+                            <option value="credit_card">Credit Card</option>
+                            <option value="paypal">PayPal</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Submit Request</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="assets/js/bootstrap.bundle.min.js"></script>
@@ -511,6 +640,42 @@ switch ($company_name_trimmed) {
 <script src="assets/plugins/metismenu/js/metisMenu.min.js"></script>
 <script src="assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js"></script>
 <script src="assets/js/app.js"></script>
+
+<script>
+function openConsultingForm() {
+    const modal = new bootstrap.Modal(document.getElementById('consultingModal'));
+    modal.show();
+}
+
+function openTechHoursForm() {
+    const modal = new bootstrap.Modal(document.getElementById('techHoursModal'));
+    modal.show();
+}
+
+function openBillingForm() {
+    const modal = new bootstrap.Modal(document.getElementById('billingModal'));
+    modal.show();
+}
+
+// Handle form submissions
+document.getElementById('consultingForm').onsubmit = function(e) {
+    e.preventDefault();
+    alert('Consulting request submitted! Our team will contact you shortly.');
+    bootstrap.Modal.getInstance(document.getElementById('consultingModal')).hide();
+};
+
+document.getElementById('techHoursForm').onsubmit = function(e) {
+    e.preventDefault();
+    alert('Tech support request submitted! Our team will contact you shortly.');
+    bootstrap.Modal.getInstance(document.getElementById('techHoursModal')).hide();
+};
+
+document.getElementById('billingForm').onsubmit = function(e) {
+    e.preventDefault();
+    alert('Billing activation request submitted! Our team will contact you shortly.');
+    bootstrap.Modal.getInstance(document.getElementById('billingModal')).hide();
+};
+</script>
 
 </body>
 </html>
