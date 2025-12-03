@@ -283,10 +283,21 @@ function calculateHealthScore($click_rate, $open_rate, $bounce_rate) {
                         <div class="col-md-4">
                             <label class="form-label fw-bold"><i class="fas fa-building"></i> Company</label>
                             <select class="form-select" name="company" onchange="this.form.submit()">
+                                <?php if ($is_admin): ?>
                                 <option value="">All Companies</option>
-                                <?php foreach ($companies_data as $comp): ?>
+                                <?php 
+                                    foreach ($companies_data as $comp): ?>
                                 <option value="<?=htmlspecialchars($comp['name'])?>" <?=$selected_company == $comp['name'] ? 'selected' : ''?>><?=htmlspecialchars($comp['name'])?></option>
                                 <?php endforeach; ?>
+                                <?php else: ?>
+                                    <?php 
+                                    // Non-admin: only show their company
+                                    foreach ($companies_data as $comp): 
+                                        if ($comp['id'] == $user_company_id): ?>
+                                <option value="<?=htmlspecialchars($comp['name'])?>" selected><?=htmlspecialchars($comp['name'])?></option>
+                                        <?php endif;
+                                    endforeach; ?>
+                                <?php endif; ?>
                             </select>
                         </div>
                         <div class="col-md-4">
@@ -495,8 +506,8 @@ document.getElementById('saveBtn').addEventListener('click', async function() {
                 card.dataset.originalDsli = dsliSel.value;
             }
             
-            btn.disabled = false;} 
-            else {
+            btn.disabled = false;
+        } else {
             msg.innerHTML = `<span class="text-danger">Error: ${result.error}</span>`;
             btn.disabled = false;
         }
