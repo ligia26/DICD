@@ -24,9 +24,7 @@ try {
             'dsli' => $dsli
         ]);
         
-        if (!empty($result)) {
-            $updated++;
-        }
+        ++$updated;
     }
     
     echo json_encode(['success' => true, 'updated' => $updated]);
