@@ -1,5 +1,5 @@
 {
-  "Feebbo": {
+  "FEEB": {
     "m1.lleganlasofertas.es": "https://m1.lleganlasofertas.es/s",
     "m1.vayapromociones.es": "https://m1.vayapromociones.es/s",
     "m1.latiendadelasofertas.com": "https://m1.latiendadelasofertas.com/s",
@@ -9,15 +9,13 @@
     "m.naturalezarefrescante.com": "https://m.naturalezarefrescante.com/s",
     "m.somosviajerosaventureros.com": "https://m.somosviajerosaventureros.com/s",
     "m.artesyculturas.com": "https://m.artesyculturas.com/s",
-    "m.tarifalo.com": "https://m.tarifalo.com/s",
-    "m.elrecomendado.com": "https://m.elrecomendado.com/s",
-    "m.itshomesolutions.com": "https://m.itshomesolutions.com/s"
+    "m.tarifalo.com": "https://m.tarifalo.com/s"
   },
-  "Kummedia": {
+  "KUMM": {
     "https://m1.recetasyconsejosdecocina.com": "https://m1.recetasyconsejosdecocina.com/s",
     "https://m1.decoraydecora.com": "https://m1.decoraydecora.com/s"
   },
-  "CPC": {
+  "CPCS": {
     "https://m.cpcseguro.com": "https://m.cpcseguro.com/s",
     "m.cuponmobile.com": "https://m.cuponmobile.com/s",
     "m1.lightofwork.com": "https://m1.lightofwork.com/s"
@@ -32,19 +30,19 @@
     "m.propostevincenti.com": "https://m.propostevincenti.com/s",
     "m.australiainsights.com": "https://m.australiainsights.com/s"
   },
-  "Trade Doubler": {
+  "TDEN": {
     "m1.clicplan.es": "https://m1.clicplan.es/s",
     "m1.cluboferting.es": "https://m1.cluboferting.es/s",
     "m1.couponandgo.es": "https://m1.couponandgo.es/s"
   },
-  "MoonShot": {
+  "MNST": {
     "m.10bestmealdeliveryservices.com": "https://m.10bestmealdeliveryservices.com/s",
     "m.socialplayhub.com": "https://m.socialplayhub.com/s"
   },
-  "Cashcow": {
+  "CASC": {
     "m.cashcow.com": "https://m.cashcow.com/s"
   },
-  "Yonkana": {
+  "YOKA": {
     "m.topdiscounts.it": "https://m.topdiscounts.it/s",
     "m.flashpromos.it": "https://m.flashpromos.it/s"
   }

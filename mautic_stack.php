@@ -2,30 +2,55 @@
 <html lang="en">
 <?php
 include "includes/head.php"; 
-
+include 'includes/db.php';
 include 'includes/functions.php';
 
 session_start();
-// Auth Check (keep if you need auth)
+// Auth Check
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
 
+$user_id = $_SESSION['user_id'];
+
+// Get user's company from database
+$user_data = getUserData($conn, $user_id);
+$user_company_id = isset($user_data['company']) ? $user_data['company'] : '';
+
+// Get company name from API using company_id
+$response = callAPI("/companies/{$user_company_id}");
+$company_data = extractAPIData($response);
+$user_company_name = $company_data['name'] ?? '';
+
+// Check if DAIN
+$is_dain = in_array($user_company_name, ['Data Innovation', 'DAIN']);
+
 
 $dataFile = __DIR__ . "/mautic_links.json";
+
+
 if (!file_exists($dataFile)) {
-    die("Fatal Error: data/mautic_links.json not found.");
+    die("Fatal Error: mautic_links.json not found.");
 }
 $raw = file_get_contents($dataFile);
 $COMPANY_MAP = json_decode($raw, true);
 if (!is_array($COMPANY_MAP)) {
-    die("Fatal Error: Invalid JSON in data/mautic_links.json");
+    die("Fatal Error: Invalid JSON in mautic_links.json");
 }
+
+
+
+
 
 // Selected filters (from POST)
 $selected_company = $_POST['company'] ?? null;
 if ($selected_company === '') $selected_company = null;
+
+// Force selected company for non-DAIN users
+if (!$is_dain && $user_company_name) {
+    $selected_company = $user_company_name;
+}
 
 $selected_sending_domain = $_POST['sending_domain'] ?? null;
 if ($selected_sending_domain === '') $selected_sending_domain = null;
@@ -33,7 +58,6 @@ if ($selected_sending_domain === '') $selected_sending_domain = null;
 // Build companies list for the dropdown
 $companies = array_keys($COMPANY_MAP);
 natcasesort($companies);
-
 
 $domain_options = []; 
 if ($selected_company && isset($COMPANY_MAP[$selected_company])) {
@@ -56,7 +80,6 @@ if ($selected_company && isset($COMPANY_MAP[$selected_company])) {
 }
 
 // Compute Mautic links to display based on filters
-// Result items: ['sending_domain' => ..., 'mautic_link' => ..., 'company_name' => ...]
 $mautic_links_to_display = [];
 
 // 1) Both company + domain selected -> exact match (if exists)
@@ -114,7 +137,7 @@ if ($selected_company && $selected_sending_domain) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mautic Stack - Links Management (JSON)</title>
+    <title>Mautic Stack - Links Management (DEBUG)</title>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -131,7 +154,6 @@ if ($selected_company && $selected_sending_domain) {
     }
     
     .page-header {
-        /* Changed to Blue/Dark Blue Gradient */
         background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
         color: white;
         padding: 2rem;
@@ -153,7 +175,6 @@ if ($selected_company && $selected_sending_domain) {
     }
     .mautic-link-item {
         background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        /* Changed border color */
         border-left: 4px solid var(--primary-blue);
         padding: 1.5rem;
         margin-bottom: 1rem;
@@ -174,7 +195,6 @@ if ($selected_company && $selected_sending_domain) {
         gap: 0.5rem;
     }
     .mautic-link-url {
-        /* Changed link color */
         color: var(--primary-blue);
         font-size: 0.95rem;
         word-break: break-all;
@@ -183,13 +203,11 @@ if ($selected_company && $selected_sending_domain) {
         gap: 0.5rem;
     }
     .mautic-link-url a {
-        /* Changed link color */
         color: var(--primary-blue);
         text-decoration: none;
         transition: all 0.2s ease;
     }
     .mautic-link-url a:hover {
-        /* Changed link hover color */
         color: var(--dark-blue);
         text-decoration: underline;
     }
@@ -199,7 +217,6 @@ if ($selected_company && $selected_sending_domain) {
         margin-bottom: 0.5rem;
     }
     .form-control:focus, .form-select:focus {
-        /* Changed focus/shadow color */
         border-color: var(--primary-blue);
         box-shadow: 0 0 0 0.2rem var(--focus-shadow);
     }
@@ -224,7 +241,6 @@ if ($selected_company && $selected_sending_domain) {
         gap: 1rem;
     }
     .count-badge {
-        /* Changed badge background color */
         background: var(--primary-blue);
         color: white;
         padding: 0.25rem 0.75rem;
@@ -232,7 +248,6 @@ if ($selected_company && $selected_sending_domain) {
         font-size: 0.85rem;
         font-weight: 600;
     }
-    /* Ensured text-primary icons use the new main color */
     .text-primary {
         color: var(--primary-blue) !important;
     }
@@ -269,7 +284,7 @@ if ($selected_company && $selected_sending_domain) {
                 <div class="page-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h2 class="mb-1"><i class="fas fa-link"></i> Mautic Stack - Links Directory</h2>
+                            <h2 class="mb-1"><i class="fas fa-link"></i> Mautic Stack - Links Directory (DEBUG MODE)</h2>
                             <p class="mb-0 opacity-75">View Mautic integration links for companies and sending domains</p>
                         </div>
                     </div>
@@ -283,6 +298,10 @@ if ($selected_company && $selected_sending_domain) {
                                 <label class="form-label">
                                     <i class="fas fa-building"></i> Select Company
                                 </label>
+                                <?php if (!$is_dain): ?>
+                                <input type="text" class="form-control" value="<?=htmlspecialchars($selected_company)?>" readonly>
+                                <input type="hidden" name="company" value="<?=htmlspecialchars($selected_company)?>">
+                                <?php else: ?>
                                 <select class="form-select" name="company" onchange="document.getElementById('filter-form').submit()">
                                     <option value="">-- Select Company --</option>
                                     <?php foreach ($companies as $c): ?>
@@ -292,6 +311,7 @@ if ($selected_company && $selected_sending_domain) {
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
+                                <?php endif; ?>
                             </div>
                             
                             <div class="col-md-6">
@@ -304,8 +324,7 @@ if ($selected_company && $selected_sending_domain) {
                                         <?php 
                                             $dom = $opt['domain']; 
                                             $compName = $opt['company_name']; 
-                                            $sel = ($selected_sending_domain === $dom) ? 'selected' : ''; 
-                                        ?>
+                                            $sel = ($selected_sending_domain === $dom) ? 'selected' : ''; ?>
                                         <option value="<?= htmlspecialchars($dom) ?>" <?= $sel ?>>
                                             <?= htmlspecialchars($dom) ?> (<?= htmlspecialchars($compName) ?>)
                                         </option>
