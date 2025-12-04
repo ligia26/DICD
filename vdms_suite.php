@@ -9,6 +9,10 @@ include 'includes/functions.php';
 if (!isset($_SESSION['user_id'])) die("No user_id in session.");
 $user_id = $_SESSION['user_id']; 
 
+// Get user's company from database
+$user_data = getUserData($conn, $user_id);
+$user_company_id = isset($user_data['company']) ? $user_data['company'] : '';
+
 $selected_domain = $_POST['domain'] ?? ''; 
 $selected_user_domain = $_POST['user_domain'] ?? ''; 
 $selected_company = $_POST['company'] ?? ''; 
@@ -24,18 +28,34 @@ if (isset($_POST['company']) && isset($_SESSION['last_selected_company'])) {
 $_SESSION['last_selected_company'] = $selected_company;
 
 try {
-    $user_company_data = getUserCompanyDataAPI($user_id);
-    $is_admin = $user_company_data['admin'] ?? 0;
-    $user_company_id = $user_company_data['company_id'] ?? null;
-
-    $companies_data = getCompaniesAPI();
-
-    if (!$is_admin && $user_company_id) {
-        $sending_domains = getSendingDomainsAPI($user_company_id);
-    } else if ($selected_company) {
-        $sending_domains = getSendingDomainsAPI(null, $selected_company);
+    // Get company name from API using company_id
+    $response = callAPI("/companies/{$user_company_id}");
+    $company_data = extractAPIData($response);
+    $user_company_name = $company_data['name'] ?? '';
+    
+    // Check if DAIN
+    $is_dain = in_array($user_company_name, ['Data Innovation', 'DAIN']);
+    
+    // NOT DAIN: Get ONLY their company
+    if (!$is_dain && $user_company_id) {
+        $companies_data = [$company_data];
+        
+        // Force selected company
+        $selected_company = $user_company_name;
+        
+        // Get ONLY their domains using api/sending_domain?company_id=X
+        $response = callAPI('/sending_domain', ['company_id' => $user_company_id]);
+        $sending_domains = extractAPIData($response);
+        
     } else {
-        $sending_domains = getSendingDomainsAPI();
+        // ADMIN: Get all companies
+        $companies_data = getCompaniesAPI();
+        
+        if ($selected_company) {
+            $sending_domains = getSendingDomainsAPI(null, $selected_company);
+        } else {
+            $sending_domains = getSendingDomainsAPI();
+        }
     }
     
     $user_domains = getUserDomainsAPI(1);
@@ -282,23 +302,17 @@ function calculateHealthScore($click_rate, $open_rate, $bounce_rate) {
                     <div class="row g-3">
                         <div class="col-md-4">
                             <label class="form-label fw-bold"><i class="fas fa-building"></i> Company</label>
+                            <?php if (!$is_dain): ?>
+                            <input type="text" class="form-control" value="<?=htmlspecialchars($selected_company)?>" readonly>
+                            <input type="hidden" name="company" value="<?=htmlspecialchars($selected_company)?>">
+                            <?php else: ?>
                             <select class="form-select" name="company" onchange="this.form.submit()">
-                                <?php if ($is_admin): ?>
                                 <option value="">All Companies</option>
-                                <?php 
-                                    foreach ($companies_data as $comp): ?>
+                                <?php foreach ($companies_data as $comp): ?>
                                 <option value="<?=htmlspecialchars($comp['name'])?>" <?=$selected_company == $comp['name'] ? 'selected' : ''?>><?=htmlspecialchars($comp['name'])?></option>
                                 <?php endforeach; ?>
-                                <?php else: ?>
-                                    <?php 
-                                    // Non-admin: only show their company
-                                    foreach ($companies_data as $comp): 
-                                        if ($comp['id'] == $user_company_id): ?>
-                                <option value="<?=htmlspecialchars($comp['name'])?>" selected><?=htmlspecialchars($comp['name'])?></option>
-                                        <?php endif;
-                                    endforeach; ?>
-                                <?php endif; ?>
                             </select>
+                            <?php endif; ?>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-bold"><i class="fas fa-globe"></i> Domain</label>
