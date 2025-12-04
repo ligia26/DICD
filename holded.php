@@ -2,9 +2,30 @@
 <html lang="en">
 <?php
 include "includes/head.php";
+include 'includes/db.php';
 include "includes/functions.php";
 
 session_start();
+
+// Auth Check
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$user_id = $_SESSION['user_id'];
+
+// Get user's company from database
+$user_data = getUserData($conn, $user_id);
+$user_company_id = isset($user_data['company']) ? $user_data['company'] : '';
+
+// Get company name from API using company_id
+$response = callAPI("/companies/{$user_company_id}");
+$company_data = extractAPIData($response);
+$user_company_name = $company_data['name'] ?? '';
+
+// Check if DAIN
+$is_dain = in_array($user_company_name, ['Data Innovation', 'DAIN']);
 
 
 $dataFile = __DIR__ . "/holded_links.json"; 
@@ -17,9 +38,38 @@ if (!is_array($COMPANY_LINKS)) {
     die("Fatal Error: Invalid JSON in /holded_links.json");
 }
 
+// Filter to only user's company if not DAIN
+if (!$is_dain && $user_company_name) {
+    // Try exact match first
+    if (isset($COMPANY_LINKS[$user_company_name])) {
+        $COMPANY_LINKS = [$user_company_name => $COMPANY_LINKS[$user_company_name]];
+    } else {
+        // Try fuzzy match - check if any JSON company contains user's company name
+        $matched = false;
+        foreach ($COMPANY_LINKS as $json_company => $url) {
+            // Check if JSON company name contains user's company name (case insensitive)
+            if (stripos($json_company, $user_company_name) !== false) {
+                $COMPANY_LINKS = [$json_company => $url];
+                $user_company_name = $json_company; // Update to use JSON company name
+                $matched = true;
+                break;
+            }
+        }
+        
+        if (!$matched) {
+            $COMPANY_LINKS = [];
+        }
+    }
+}
+
 // Selected company (POST)
 $selected_company = $_POST['company'] ?? null;
 if ($selected_company === '') $selected_company = null;
+
+// Force selected company for non-DAIN users
+if (!$is_dain && $user_company_name) {
+    $selected_company = $user_company_name;
+}
 
 // Build sorted company list
 $companies = array_keys($COMPANY_LINKS);
@@ -44,7 +94,7 @@ if ($selected_company && isset($COMPANY_LINKS[$selected_company])) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tableau Projects Directory</title>
+  <title>Holded - Invoices and Billing</title>
 
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -127,8 +177,8 @@ if ($selected_company && isset($COMPANY_LINKS[$selected_company])) {
 
         <!-- page header -->
         <div class="page-header">
-          <h2 class="mb-1"><i class="fa-solid fa-chart-column me-2"></i>Holded Directory</h2>
-          <p class="mb-0 opacity-75">Select a company to open its Invoice and Billing details in Holded</p>
+          <h2 class="mb-1"><i class="fa-solid fa-file-invoice me-2"></i>Holded - Invoices and Billing</h2>
+          <p class="mb-0 opacity-75">Access your company's invoice and billing details in Holded</p>
         </div>
 
         <!-- filters -->
@@ -137,6 +187,10 @@ if ($selected_company && isset($COMPANY_LINKS[$selected_company])) {
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="form-label"><i class="fa-solid fa-building me-1"></i>Company</label>
+                <?php if (!$is_dain): ?>
+                <input type="text" class="form-control" value="<?=htmlspecialchars($selected_company)?>" readonly>
+                <input type="hidden" name="company" value="<?=htmlspecialchars($selected_company)?>">
+                <?php else: ?>
                 <select class="form-select" name="company" onchange="document.getElementById('filter-form').submit()">
                   <option value="">-- All Companies --</option>
                   <?php foreach ($companies as $c): ?>
@@ -144,6 +198,7 @@ if ($selected_company && isset($COMPANY_LINKS[$selected_company])) {
                     <option value="<?= htmlspecialchars($c) ?>" <?= $sel ?>><?= htmlspecialchars($c) ?></option>
                   <?php endforeach; ?>
                 </select>
+                <?php endif; ?>
               </div>
             </div>
           </form>
@@ -159,14 +214,24 @@ if ($selected_company && isset($COMPANY_LINKS[$selected_company])) {
         </div>
 
         <!-- cards -->
-        <?php foreach ($links_to_display as $item): ?>
+        <?php if (count($links_to_display) > 0): ?>
+          <?php foreach ($links_to_display as $item): ?>
+            <div class="link-card">
+              <div class="company mb-1"><i class="fa-solid fa-building me-1"></i><?= htmlspecialchars($item['company']) ?></div>
+              <div class="url"><i class="fa-solid fa-link me-1"></i>
+                <a href="<?= htmlspecialchars($item['url']) ?>" target="_blank" rel="noopener noreferrer"><?= htmlspecialchars($item['url']) ?></a>
+              </div>
+            </div>
+          <?php endforeach; ?>
+        <?php else: ?>
           <div class="link-card">
-            <div class="company mb-1"><i class="fa-solid fa-building me-1"></i><?= htmlspecialchars($item['company']) ?></div>
-            <div class="url"><i class="fa-solid fa-link me-1"></i>
-              <a href="<?= htmlspecialchars($item['url']) ?>" target="_blank" rel="noopener noreferrer"><?= htmlspecialchars($item['url']) ?></a>
+            <div class="text-center text-muted py-3">
+              <i class="fa-solid fa-inbox fa-3x mb-3" style="opacity: 0.3;"></i>
+              <h5>No Holded Links Found</h5>
+              <p>No links available for your company.</p>
             </div>
           </div>
-        <?php endforeach; ?>
+        <?php endif; ?>
 
       </div>
     </div>
