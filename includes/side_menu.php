@@ -12,14 +12,14 @@
     <ul class="metismenu" id="menu">
       
       <li>
-        <a href="dashboard_new.php">
+        <a href="index.php">
           <div class="parent-icon"><i class='bx bx-desktop'></i></div>
           <div class="menu-title">Dashboard</div>
         </a>
       </li>
 
        <li>
-        <a href="dashboard_new.php">
+        <a href="index.php">
           <div class="parent-icon"><i class='bx bx-desktop'></i></div>
           <div class="menu-title">Dashboard</div>
         </a>
